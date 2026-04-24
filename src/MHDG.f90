@@ -87,18 +87,39 @@ PROGRAM MHDG
 
 
   IF((ierr .EQ. 0)) THEN
+     ! Reset reference element to match the base mesh to be reloaded
+     CALL free_reference_element_pol(refElPol)
      CALL free_mesh
      IF((switch%testcase .GE. 60) .AND. (switch%testcase .LE. 80)) THEN
         CALL load_gmsh_mesh(mesh_name, 1)
      ELSE
         CALL load_gmsh_mesh(mesh_name, 0)
      ENDIF
+     ! Re-create base reference element
+     CALL create_reference_element(refElPol, 2, verbose = 1)
 
      CALL mesh_preprocess_serial(ierr)
 
      IF(ierr .EQ. 0) THEN
         WRITE(*,*) "Problem in mesh_preprocess. STOP."
         STOP
+     ENDIF
+
+     ! If we needed to promote the order, do it now after successful base preprocessing
+     IF((switch%set_2d_order) .AND. (refElPol%nDeg .NE. switch%order_2d) ) THEN
+        CALL set_order_mesh(switch%order_2d)
+        CALL free_reference_element_pol(refElPol)
+        CALL create_reference_element(refElPol, 2, verbose = 0)
+        Mesh%X = Mesh%X*phys%lscale
+        Mesh%xmax = Mesh%xmax*phys%lscale
+        Mesh%xmin = Mesh%xmin*phys%lscale
+        Mesh%ymax = Mesh%ymax*phys%lscale
+        Mesh%ymin = Mesh%ymin*phys%lscale
+        CALL mesh_preprocess_serial(ierr)
+        IF(ierr .EQ. 0) THEN
+           WRITE(*,*) "Problem in mesh_preprocess after promotion. STOP."
+           STOP
+        ENDIF
      ENDIF
   ENDIF
 

@@ -140,7 +140,7 @@ LinearAlgebra.o : LinearAlgebra.F
 inout.F : $(SDIR)/InOut/inout.f90
 	$(CMP) -s $< $@ || $(CP) -f $< $@
 
-inout.o : inout.F HDF5_io.o flux_surface_transport_data.o transport_models_1d.o globals.o PrintUtils.o LinearAlgebra.o gmsh_io.o MPI_OMP.o Communications.o
+inout.o : inout.F HDF5_io.o flux_surface_transport_data.o transport_models_1d.o globals.o PrintUtils.o LinearAlgebra.o gmsh_io.o MPI_OMP.o Communications.o interpolation.o
 	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
 
 Debug.F : $(SDIR)/Utils/Debug.f90
@@ -206,7 +206,7 @@ preprocess.o : preprocess.F globals.o PrintUtils.o types.o MPI_OMP.o
 flux_surface_transport_data.F : $(SDIR)/Models/$(RMDL)/transport_1d/flux_surface_transport_data.f90
 	$(CMP) -s $< $@ || $(CP) -f $< $@
 
-flux_surface_transport_data.o : flux_surface_transport_data.F globals.o MPI_OMP.o HDF5_io.o
+flux_surface_transport_data.o : flux_surface_transport_data.F globals.o MPI_OMP.o HDF5_io.o interpolation.o
 	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
 
 transport_models_1d_config.F : $(SDIR)/Models/$(RMDL)/transport_1d/transport_models_1d_config.f90

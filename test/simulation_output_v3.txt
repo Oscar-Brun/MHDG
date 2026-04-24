@@ -1,0 +1,163 @@
+hwloc/linux: Ignoring PCI device with non-16bit domain.
+Pass --enable-32bits-pci-domain to configure to support such devices
+(warning: it would break the library ABI, don't enable unless really needed).
+ STARTING
+ Using           12  threads
+ Adimensionalizing input values
+                                                                       
+                                                                       
+ ------------------------  MHDG SIMULATION IN 2D ----------------------
+                                                                       
+  MODEL: N-Gamma-Ti-Te with neutral                                    
+                                                                       
+ ----------------------------------------------------------------------
+   Simulation type: Time advancing simulation
+ ----------------------------------------------------------------------
+ Parameter file loaded:
+         ***************** Geometry ****************************
+                 - R0:                                                    3.3999999999999999     
+                 - Security factor:                                       3.5000000000000000     
+       	***************** Magnetic ****************************
+ 		            - RMP amplitude:                                         5.0000000000000002E-005
+ 		            - RMP coil number:                                               8
+ 		            - RMP coil toroidal elongation:                         0.39269910000000002     
+ 		            - RMP parity:                                                   -1
+ 		            - RMP row number:                                                2
+ 		            - Ripple amplitude:                                      5.0000000000000001E-004
+ 		            - Ripple coil number:                                           18
+ 		            - triangularity:                                         0.0000000000000000     
+ 		            - ellipticity:                                           1.0000000000000000     
+         ***************** Time stepping ************************
+                 - dt0:                                                   1000.0000000000000     
+                 - dt modification:                                               0
+                 - final time:                                            10000000000.000000     
+                 - max number of time steps:                                     10
+                 - time integration scheme:                                       1
+         ***************** Physics *****************************
+                 - perp. diffusion in the continuity equation:           0.76041818572743769     
+                 - perp. diffusion in the momentum equation:             0.76041818572743769     
+                 - perp. diffusion in the ions energy equation:          0.76041818572743769     
+                 - perp. diffusion in the electrons energy equation:     0.76041818572743769     
+                 - paral. diffusion for ions temperature:                 314436.67068200454     
+                 - paral. diffusion for electrons temperature:            10481222.356066819     
+                 - temperature exchange coefficient ions/electrons:      -578.65807886487119     
+                 - temperature diffusion exponential:                     2.5000000000000000     
+                 - reference Mach number:                                 12.492369431566924     
+                 - gamma for Bohm boundary condition on ions:             2.5000000000000000     
+                 - gamma for Bohm boundary condition for electrons:       4.5000000000000000     
+              - Zeff                                                   1.0000000000000000     
+              - Ohmic heating                                          4.7999999999999997E-014
+                 - diffusion in the neutral equation:                     7604181.8572743768     
+                 - recycling coefficient in the neutral equation:        0.99800000000000000     
+                 - recycling coefficient pump in the neutral equation:   0.94999999999999996     
+                 - applying trim:                                       F
+                 - puff coefficient in the neutral equation:              4.0000000000000000E+020
+                 - cryopump power coefficient in the neutral equation:    10.000000000000000     
+                 - flux limiter applied:                                F
+                 - T_maxi for the flux limiter:                          1.0000000000000000     
+                 - T_maxe for the flux limiter:                          1.0000000000000000     
+                 - impurity name:                                     W
+                 - impurity concentration:                               0.0000000000000000     
+                 - import 1D diffusion profile:                        F
+                 - particle source at core:                               0.0000000000000000     
+                 - energy source at core:                                 20000000.000000000     
+                 - constant for the momentum equation (isoth)             24.984738863133849     
+                 - diagonal implicit sources                              0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000     
+         ***************** Switches ****************************
+                 - stady state simulation:                              F
+                 - axisym:                                              T
+   Initializing with analytical solution at nodes                    
+                 - driftdia:                                            F
+                 - driftexb:                                            F
+                 - test case:                                                    54
+                 - Ohmic heating:                                       T
+                 - Moving equilibrium:                                  F
+                 - Diffusion adjusted to plasma current:                F
+                 - RMP:                                                 F
+                 - Ripple:                                              F
+                 - shockcp:                                                       0
+                 - minrho:                                                9.9999999999999998E-013
+                 - logrho:                                              F
+                 - thresh:                                                        0
+                 - filter:                                              F
+                 - decoup:                                              F
+                 - ckeramp:                                             F
+                 - saveNR:                                              T
+                 - saveTau:                                             F
+                 - transport_1d:                           F
+                 - transport_model_path:                  transport_model.nml
+                 - rho_core (transport model):              0.80000000000000004     
+                 - rho_edge (transport model):              0.98999999999999999     
+                 - rho_diffusion_model_max (transport model):          1.0000000000000000     
+                 - c_bohm_i (transport model):              1.6000000000000001E-004
+                 - c_gyrobohm_i (transport model):          1.7500000000000002E-002
+                 - c_bohm_e (transport model):              8.0000000000000007E-005
+                 - c_gyrobohm_e (transport model):          3.5000000000000003E-002
+                 - c_bohm_n (transport model):              1.0000000000000000     
+                 - prandtl (transport model):               1.0000000000000000     
+                 - pinch_model (transport model):                   1
+                 - c_pinch (transport model):              0.50000000000000000     
+                 - nu_th (transport model):                 4.0000000000000001E-002
+         ***************** Numerics ****************************
+                 - stabilization type:                                            5
+                 - tau(1):                                                1.0000000000000000     
+                 - tau(2):                                                1.0000000000000000     
+                 - tau(3):                                                1.0000000000000000     
+                 - tau(4):                                                1.0000000000000000     
+                 - tau(5):                                                1.0000000000000000     
+                 - max number of N-R iterations:                                  3
+                 - tolerance for the N-R scheme:                          2.0000000000000001E-004
+                 - tolerance for the steady state achievement:            1.0000000000000000E-008
+                 - using a dumping factor for Newton-Raphson:            0.10000000000000001     
+                 - dumping for ExB term:          1.0000000000000000     
+                 - type of bohm boundary condition:                                0
+         ***************** Linear solver params******************
+                 - Library used for the linear system:   PASTIX      
+         
+
+LOADING GMSH FILE
+
+  Node data read from file "./Meshes/WEST_57929_11_P8.msh"
+
+  Number of nodes = ****
+  Spatial dimension =    2
+  Number of elements = 4240
+  Element order =    9
+ Loading mesh with mesh2global_var.
+         
+ *************************************************
+ *                    MESH                       *
+ *************************************************
+ Number of dimensions:                          2
+ Element type:                          triangles
+ Number of elements:                         4017
+ Number of nodes:                          129437
+ Number of nodes per element:                  45
+ Number of nodes per face:                      9
+ Number of exterior faces:                    223
+  
+  
+ *************************************************
+ *                REFERENCE ELEMENT              *
+ *************************************************
+ Number of dimensions              :             2
+ Polynomial interpolation of degree:             8
+ Number of shape functions 2D:                  45
+ Number of shape functions 1D:                   9
+ Number of Gauss points 2D:                    126
+ Number of Gauss points 1D:                     10
+         
+ *************************************************
+ *                REFERENCE ELEMENT              *
+ *************************************************
+ Number of dimensions              :             2
+ Polynomial interpolation of degree:             8
+ Number of shape functions 2D:                  45
+ Number of shape functions 1D:                   9
+ Number of Gauss points 2D:                    126
+ Number of Gauss points 1D:                     10
+         
+ *************************************************
+ *                MESH PREPROCESS                *
+ *************************************************
+ Creating nodal connectivity 

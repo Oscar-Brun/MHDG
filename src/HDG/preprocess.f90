@@ -1134,8 +1134,10 @@ CONTAINS
           Mesh%flipFace(infoFace(1), infoFace(2)) = .TRUE.
        END IF
 #ifdef PARALL
-       IF (Mesh%ghostFaces(ifa) .EQ. 1) THEN
-          igh = igh + 1
+       IF (ASSOCIATED(Mesh%ghostFaces)) THEN
+          IF (Mesh%ghostFaces(ifa) .EQ. 1) THEN
+             igh = igh + 1
+          END IF
        END IF
 #endif
     END DO
@@ -1150,10 +1152,14 @@ CONTAINS
        Mesh%F(infoFace_ex(1), infoFace_ex(2)) = ifa + Mesh%Nintfaces
        Mesh%Fdir(infoFace_ex(1), infoFace_ex(2)) = isdir
 #ifdef PARALL
-       IF (Mesh%ghostFaces(ifa + Mesh%Nintfaces) .EQ. 1) THEN
-          igh = igh + 1
-          IF (Mesh%ghostFlp(igh) .EQ. 1) THEN
-             Mesh%flipFace(infoFace_ex(1), infoFace_ex(2)) = .TRUE.
+       IF (ASSOCIATED(Mesh%ghostFaces)) THEN
+          IF (Mesh%ghostFaces(ifa + Mesh%Nintfaces) .EQ. 1) THEN
+             igh = igh + 1
+             IF (ASSOCIATED(Mesh%ghostFlp)) THEN
+                IF (Mesh%ghostFlp(igh) .EQ. 1) THEN
+                   Mesh%flipFace(infoFace_ex(1), infoFace_ex(2)) = .TRUE.
+                END IF
+             END IF
           END IF
        END IF
 #endif
@@ -1258,6 +1264,7 @@ CONTAINS
     REAL*8   :: Xf(refElPol%Nfacenodes,2),xyg(refElPol%NGauss1D,2),xyg_d(refElPol%NGauss1D,2),dline
     INTEGER  :: i,el,fa,fl,g, counterfl, counternogho, countergo
     REAL*8   :: xyDerNorm_g
+    LOGICAL  :: skip_face
 
     counternogho = 0
     counterfl = 0
@@ -1285,9 +1292,18 @@ CONTAINS
        Xf = Mesh%X(Mesh%T(el,refElPol%face_nodes(fa,:)),:)
        xyg = MATMUL(refElPol%N1D,Xf)
        xyg_d = MATMUL(refElPol%Nxi1D,Xf)
+
+       skip_face = .FALSE.
 #ifdef PARALL
-       IF (Mesh%ghostFaces(Mesh%Nintfaces+i) .EQ. 0) THEN
+       IF (ASSOCIATED(Mesh%ghostFaces)) THEN
+          IF (Mesh%ghostFaces(Mesh%Nintfaces+i) .NE. 0) THEN
+             skip_face = .TRUE.
+             countergo = countergo + 1
+          END IF
+       END IF
 #endif
+
+       IF (.NOT. skip_face) THEN
           counternogho = counternogho + 1
           DO g = 1, refElPol%NGauss1D
              xyDerNorm_g = NORM2(xyg_d(g,:))
@@ -1295,11 +1311,7 @@ CONTAINS
              dline = dline*xyg(g,1)
              Mesh%puff_area = Mesh%puff_area + 2*pi*dline
           END DO
-#ifdef PARALL
-        ELSE
-          countergo = countergo + 1
-        ENDIF
-#endif
+       END IF
     END DO
 
   ENDSUBROUTINE computePuffArea
@@ -1308,6 +1320,7 @@ CONTAINS
     REAL*8   :: Xf(refElPol%Nfacenodes,2),xyg(refElPol%NGauss1D,2),xyg_d(refElPol%NGauss1D,2),dline
     INTEGER  :: i,el,fa,fl,g, counter
     REAL*8   :: xyDerNorm_g
+    LOGICAL  :: skip_face
 
     counter = 0
     Mesh%pump_area = 0.
@@ -1327,9 +1340,17 @@ CONTAINS
        Xf = Mesh%X(Mesh%T(el,refElPol%face_nodes(fa,:)),:)
        xyg = MATMUL(refElPol%N1D,Xf)
        xyg_d = MATMUL(refElPol%Nxi1D,Xf)
+
+       skip_face = .FALSE.
 #ifdef PARALL
-       IF (Mesh%ghostFaces(Mesh%Nintfaces+i) .EQ. 0) THEN
+       IF (ASSOCIATED(Mesh%ghostFaces)) THEN
+          IF (Mesh%ghostFaces(Mesh%Nintfaces+i) .NE. 0) THEN
+             skip_face = .TRUE.
+          END IF
+       END IF
 #endif
+
+       IF (.NOT. skip_face) THEN
           counter = counter + 1
           DO g = 1, refElPol%NGauss1D
              xyDerNorm_g = NORM2(xyg_d(g,:))
@@ -1337,9 +1358,7 @@ CONTAINS
              dline = dline*xyg(g,1)
              Mesh%pump_area = Mesh%pump_area + 2*pi*dline
           END DO
-#ifdef PARALL
        END IF
-#endif
     END DO
   ENDSUBROUTINE computePumpArea
 

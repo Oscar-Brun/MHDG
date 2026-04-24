@@ -1,3 +1,4 @@
+
 #-------------------------------------------------------------------------------
 # Source directory
 #-------------------------------------------------------------------------------
@@ -9,8 +10,8 @@ SDIR=$(PWD)/../src/
 COMPTYPE_OPT = opt
 COMPTYPE_DEB = deb
 COMPTYPE_PRO = pro
-#COMPTYPE = $(COMPTYPE_OPT)
-COMPTYPE = $(COMPTYPE_DEB)
+COMPTYPE = $(COMPTYPE_OPT)
+#COMPTYPE = $(COMPTYPE_DEB)
 #COMPTYPE = $(COMPTYPE_PRO)
 
 #-------------------------------------------------------------------------------
@@ -24,7 +25,7 @@ MODE = $(MODE_SERIAL)
 #-------------------------------------------------------------------------------
 # The compiler
 #-------------------------------------------------------------------------------
-FC = mpifort
+FC = /usr/bin/mpifort
 
 #-------------------------------------------------------------------------------
 # Model
@@ -284,8 +285,9 @@ ifeq ($(PASTIX),$(LIB_YES))
  #LIB += -L$(HOME)/libs/scotch_6.0.4/lib/ -lscotch -lscotcherrexit  -lptscotchparmetis -lptscotch -lpthread -lhwloc
  #LIB += -L$(MHDG_PASTIX_DIR)/install -lpastix -lm -lrt -lifcore
  #New GNU
- LIB += -L$(MHDG_SCOTCH_DIR)/lib -lptscotch -lscotch -lptscotcherr -lz -lm -lrt -lpthread -lhwloc
  LIB += $(shell echo `PKG_CONFIG_PATH=${PKG_CONFIG_PATH} pkg-config --libs pastix pastixf`)
+ LIB += -L$(MHDG_SCOTCH_DIR)/lib -lptscotch -lscotch -lptscotcherr -lz -lm -lrt -lpthread -lhwloc
+ LIB += -lopenblas
  #New INTEL
  #LIB += -L$(MHDG_SCOTCH_DIR)/lib -lptscotch -lscotch -lptscotcherr -lz -lm -lrt -lpthread
  #LIB += -L$(MHDG_PASTIX_DIR)/install -lpastix -lm -lrt -lifcore -lpthread -lhwloc -lptscotch -lscotch -lscotcherr
@@ -293,7 +295,7 @@ endif
 
 # BLAS/LAPACK
 #Local
-LIB += -L/usr/lib/x86_64-linux-gnu -lblas -llapack -llapacke
+LIB += -L/usr/lib/x86_64-linux-gnu -lopenblas -lblas -llapack -llapacke
 
 # MKL
 #LIB += -L$(MHDG_MKL_DIR)/build/mkl/latest/lib/intel64 -Wl,-rpath,$(MHDG_MKL_DIR)/build/mkl/latest/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl

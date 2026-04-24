@@ -1,0 +1,307 @@
+hwloc/linux: Ignoring PCI device with non-16bit domain.
+Pass --enable-32bits-pci-domain to configure to support such devices
+(warning: it would break the library ABI, don't enable unless really needed).
+ STARTING
+ Using           12  threads
+ Adimensionalizing input values
+                                                                       
+                                                                       
+ ------------------------  MHDG SIMULATION IN 2D ----------------------
+                                                                       
+  MODEL: N-Gamma-Ti-Te with neutral                                    
+                                                                       
+ ----------------------------------------------------------------------
+   Simulation type: Pseudotime simulation for reducing diffusion
+ ----------------------------------------------------------------------
+ Parameter file loaded:
+         ***************** Geometry ****************************
+                 - R0:                                                    3.3999999999999999     
+                 - Security factor:                                       3.5000000000000000     
+       	***************** Magnetic ****************************
+ 		            - RMP amplitude:                                         5.0000000000000002E-005
+ 		            - RMP coil number:                                               8
+ 		            - RMP coil toroidal elongation:                         0.39269910000000002     
+ 		            - RMP parity:                                                   -1
+ 		            - RMP row number:                                                2
+ 		            - Ripple amplitude:                                      5.0000000000000001E-004
+ 		            - Ripple coil number:                                           18
+ 		            - triangularity:                                         0.0000000000000000     
+ 		            - ellipticity:                                           1.0000000000000000     
+         ***************** Time stepping ************************
+                 - dt0:                                                   1000.0000000000000     
+                 - dt modification:                                               0
+                 - final time:                                            10000000000.000000     
+                 - max number of time steps:                                     10
+                 - time integration scheme:                                       1
+         ***************** Physics *****************************
+                 - perp. diffusion in the continuity equation:           0.76041818572743769     
+                 - perp. diffusion in the momentum equation:             0.76041818572743769     
+                 - perp. diffusion in the ions energy equation:          0.76041818572743769     
+                 - perp. diffusion in the electrons energy equation:     0.76041818572743769     
+                 - paral. diffusion for ions temperature:                 314436.67068200454     
+                 - paral. diffusion for electrons temperature:            10481222.356066819     
+                 - temperature exchange coefficient ions/electrons:      -578.65807886487119     
+                 - temperature diffusion exponential:                     2.5000000000000000     
+                 - reference Mach number:                                 12.492369431566924     
+                 - gamma for Bohm boundary condition on ions:             2.5000000000000000     
+                 - gamma for Bohm boundary condition for electrons:       4.5000000000000000     
+              - Zeff                                                   1.0000000000000000     
+              - Ohmic heating                                          4.7999999999999997E-014
+                 - diffusion in the neutral equation:                     7604181.8572743768     
+                 - recycling coefficient in the neutral equation:        0.99800000000000000     
+                 - recycling coefficient pump in the neutral equation:   0.94999999999999996     
+                 - applying trim:                                       F
+                 - puff coefficient in the neutral equation:              4.0000000000000000E+020
+                 - cryopump power coefficient in the neutral equation:    10.000000000000000     
+                 - flux limiter applied:                                F
+                 - T_maxi for the flux limiter:                          1.0000000000000000     
+                 - T_maxe for the flux limiter:                          1.0000000000000000     
+                 - impurity name:                                     W
+                 - impurity concentration:                               0.0000000000000000     
+                 - import 1D diffusion profile:                        F
+                 - particle source at core:                               0.0000000000000000     
+                 - energy source at core:                                 20000000.000000000     
+                 - constant for the momentum equation (isoth)             24.984738863133849     
+                 - diagonal implicit sources                              0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000     
+         ***************** Switches ****************************
+                 - stady state simulation:                              F
+                 - axisym:                                              T
+   Initializing with analytical solution at nodes                    
+                 - driftdia:                                            F
+                 - driftexb:                                            F
+                 - test case:                                                    54
+                 - Ohmic heating:                                       T
+                 - Moving equilibrium:                                  F
+                 - Diffusion adjusted to plasma current:                F
+                 - RMP:                                                 F
+                 - Ripple:                                              F
+                 - shockcp:                                                       0
+                 - minrho:                                                9.9999999999999998E-013
+                 - logrho:                                              F
+                 - thresh:                                                        0
+                 - filter:                                              F
+                 - decoup:                                              F
+                 - ckeramp:                                             F
+                 - saveNR:                                              T
+                 - saveTau:                                             F
+                 - transport_1d:                           F
+                 - transport_model_path:                  transport_model.nml
+                 - rho_core (transport model):              0.80000000000000004     
+                 - rho_edge (transport model):              0.98999999999999999     
+                 - rho_diffusion_model_max (transport model):          1.0000000000000000     
+                 - c_bohm_i (transport model):              1.6000000000000001E-004
+                 - c_gyrobohm_i (transport model):          1.7500000000000002E-002
+                 - c_bohm_e (transport model):              8.0000000000000007E-005
+                 - c_gyrobohm_e (transport model):          3.5000000000000003E-002
+                 - c_bohm_n (transport model):              1.0000000000000000     
+                 - prandtl (transport model):               1.0000000000000000     
+                 - pinch_model (transport model):                   1
+                 - c_pinch (transport model):              0.50000000000000000     
+                 - nu_th (transport model):                 4.0000000000000001E-002
+         ***************** Numerics ****************************
+                 - stabilization type:                                            5
+                 - tau(1):                                                1.0000000000000000     
+                 - tau(2):                                                1.0000000000000000     
+                 - tau(3):                                                1.0000000000000000     
+                 - tau(4):                                                1.0000000000000000     
+                 - tau(5):                                                1.0000000000000000     
+                 - max number of N-R iterations:                                  3
+                 - tolerance for the N-R scheme:                          2.0000000000000001E-004
+                 - tolerance for the steady state achievement:            1.0000000000000000E-008
+                 - using a dumping factor for Newton-Raphson:            0.10000000000000001     
+                 - dumping for ExB term:          1.0000000000000000     
+                 - type of bohm boundary condition:                                0
+         ***************** Linear solver params******************
+                 - Library used for the linear system:   PASTIX      
+         
+
+LOADING GMSH FILE
+
+  Node data read from file "./Meshes/WEST_57929_11_P1.msh"
+
+  Number of nodes = 2121
+  Spatial dimension =    2
+  Number of elements = 4240
+  Element order =    2
+ Loading mesh with mesh2global_var.
+         
+ *************************************************
+ *                    MESH                       *
+ *************************************************
+ Number of dimensions:                          2
+ Element type:                          triangles
+ Number of elements:                         4017
+ Number of nodes:                            2121
+ Number of nodes per element:                   3
+ Number of nodes per face:                      2
+ Number of exterior faces:                    223
+  
+  
+ *************************************************
+ *                REFERENCE ELEMENT              *
+ *************************************************
+ Number of dimensions              :             2
+ Polynomial interpolation of degree:             1
+ Number of shape functions 2D:                   3
+ Number of shape functions 1D:                   2
+ Number of Gauss points 2D:                      7
+ Number of Gauss points 1D:                      3
+         
+ *************************************************
+ *                REFERENCE ELEMENT              *
+ *************************************************
+ Number of dimensions              :             2
+ Polynomial interpolation of degree:             1
+ Number of shape functions 2D:                   3
+ Number of shape functions 1D:                   2
+ Number of Gauss points 2D:                      7
+ Number of Gauss points 1D:                      3
+         
+ *************************************************
+ *                MESH PREPROCESS                *
+ *************************************************
+ Creating nodal connectivity 
+ Creating faces structures 
+Process:             0 Number of interior faces:                    5914
+Process:             0 Number of faces:                             6137
+ Boundary conditions preprocess 
+ *************************************************
+ *          BOUNDARY CONDITIONS                  *
+ *************************************************
+ Boundary type: Bohm for plasma, pump for neutrals on boundary flagged as: Tb_PUMP
+ Boundary type: Bohm for plasma, puff for neutrals on boundary flagged as: Tb_PUFF
+ Boundary type: Bohm on boundary flagged as: Tb_OUT
+  
+ Number of different boundaries:                 3
+ Number of Dirichlet faces:                      0
+ Number of Ghost faces:                          0
+  
+ Creating face connectivity 
+Process:             1 Number of interior faces:                    5914
+Process:             1 Number of faces:                             6137
+ Number of different boundaries:                 3
+ Number of Dirichlet faces:                      0
+ Number of Ghost faces:                          0
+  
+Process:             2 Number of interior faces:                    5914
+Process:             2 Number of faces:                             6137
+ Number of different boundaries:                 3
+ Number of Dirichlet faces:                      0
+ Number of Ghost faces:                          0
+  
+Process:             3 Number of interior faces:                    5914
+Process:             3 Number of faces:                             6137
+ Number of different boundaries:                 3
+ Number of Dirichlet faces:                      0
+ Number of Ghost faces:                          0
+  
+ Computing element size 
+ Done! 
+ Computing puff area
+ Puff area:     1.5237152182969125       m^2
+ Computing pump area
+ Pump area:     8.4632495468410465       m^2
+ Core area:     0.0000000000000000       m^2
+ Done! 
+ *************************************************
+ *              INCREASE ORDER MESH              *
+ *************************************************
+ *************************************************
+ *                REFERENCE ELEMENT              *
+ *************************************************
+ Number of dimensions              :             2
+ Polynomial interpolation of degree:             4
+ Number of shape functions 2D:                  15
+ Number of shape functions 1D:                   5
+ Number of Gauss points 2D:                     54
+ Number of Gauss points 1D:                      6
+         
+ Loading mesh with mesh2global_var.
+         
+ *************************************************
+ *                    MESH                       *
+ *************************************************
+ Number of dimensions:                          2
+ Element type:                          triangles
+ Number of elements:                         4017
+ Number of nodes:                           32583
+ Number of nodes per element:                  15
+ Number of nodes per face:                      5
+ Number of exterior faces:                    223
+  
+  
+ *************************************************
+             DOMAIN DECOMPOSITION                 
+ *************************************************
+ Angle of rotation:    0.0000000000000000     
+
+Program received signal SIGSEGV: Segmentation fault - invalid memory reference.
+
+Backtrace for this error:
+
+Program received signal SIGSEGV: Segmentation fault - invalid memory reference.
+
+Backtrace for this error:
+
+Program received signal SIGSEGV: Segmentation fault - invalid memory reference.
+
+Backtrace for this error:
+
+Program received signal SIGSEGV: Segmentation fault - invalid memory reference.
+
+Backtrace for this error:
+#0  0x747d67023960 in ???
+#1  0x747d67022ac5 in ???
+#2  0x747d5e84251f in ???
+	at ./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0
+#0  0x7a8ca6a23960 in ???
+#1  0x7a8ca6a22ac5 in ???
+#2  0x7a8c9e24251f in ???
+	at ./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0
+#3  0x637302952385 in __domain_decomposition_module_MOD_split_mesh
+	at /home/obrun/MHDG/lib/domain_decomposition.F:283
+#3  0x5e6fabd65385 in __domain_decomposition_module_MOD_split_mesh
+	at /home/obrun/MHDG/lib/domain_decomposition.F:283
+#4  0x6373026788da in __main_utils_MOD_domain_decomposition
+	at /home/obrun/MHDG/lib/Main_utils.F:80
+#4  0x5e6faba8b8da in __main_utils_MOD_domain_decomposition
+	at /home/obrun/MHDG/lib/Main_utils.F:80
+#5  0x5e6fabd81d7d in mhdg
+	at /home/obrun/MHDG/lib/MHDG.F:136
+#6  0x5e6fabd83dd0 in main
+	at /home/obrun/MHDG/lib/MHDG.F:2
+#5  0x63730296ed7d in mhdg
+	at /home/obrun/MHDG/lib/MHDG.F:136
+#6  0x637302970dd0 in main
+	at /home/obrun/MHDG/lib/MHDG.F:2
+#0  0x731fbec23960 in ???
+#1  0x731fbec22ac5 in ???
+#0  0x7cc0afc23960 in ???
+#1  0x7cc0afc22ac5 in ???
+#2  0x731fb644251f in ???
+	at ./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0
+#2  0x7cc0a744251f in ???
+	at ./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0
+#3  0x63dbd2533385 in __domain_decomposition_module_MOD_split_mesh
+	at /home/obrun/MHDG/lib/domain_decomposition.F:283
+#3  0x63e97d777385 in __domain_decomposition_module_MOD_split_mesh
+	at /home/obrun/MHDG/lib/domain_decomposition.F:283
+#4  0x63dbd22598da in __main_utils_MOD_domain_decomposition
+	at /home/obrun/MHDG/lib/Main_utils.F:80
+#4  0x63e97d49d8da in __main_utils_MOD_domain_decomposition
+	at /home/obrun/MHDG/lib/Main_utils.F:80
+#5  0x63dbd254fd7d in mhdg
+	at /home/obrun/MHDG/lib/MHDG.F:136
+#6  0x63dbd2551dd0 in main
+	at /home/obrun/MHDG/lib/MHDG.F:2
+#5  0x63e97d793d7d in mhdg
+	at /home/obrun/MHDG/lib/MHDG.F:136
+#6  0x63e97d795dd0 in main
+	at /home/obrun/MHDG/lib/MHDG.F:2
+--------------------------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun noticed that process rank 0 with PID 0 on node mrsm2p2itc-s82 exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------

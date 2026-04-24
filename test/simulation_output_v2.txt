@@ -1,0 +1,51 @@
+hwloc/linux: Ignoring PCI device with non-16bit domain.
+Pass --enable-32bits-pci-domain to configure to support such devices
+(warning: it would break the library ABI, don't enable unless really needed).
+ STARTING
+ Using           12  threads
+ Adimensionalizing input values
+                                                                       
+                                                                       
+ ------------------------  MHDG SIMULATION IN 2D ----------------------
+                                                                       
+  MODEL: N-Gamma-Ti-Te with neutral                                    
+                                                                       
+ ----------------------------------------------------------------------
+   Simulation type: Time advancing simulation
+ ----------------------------------------------------------------------
+ Parameter file loaded:
+         ***************** Geometry ****************************
+                 - R0:                                                    3.3999999999999999     
+                 - Security factor:                                       3.5000000000000000     
+       	***************** Magnetic ****************************
+ 		            - RMP amplitude:                                         5.0000000000000002E-005
+ 		            - RMP coil number:                                               8
+ 		            - RMP coil toroidal elongation:                         0.39269910000000002     
+ 		            - RMP parity:                                                   -1
+ 		            - RMP row number:                                                2
+ 		            - Ripple amplitude:                                      5.0000000000000001E-004
+ 		            - Ripple coil number:                                           18
+ 		            - triangularity:                                         0.0000000000000000     
+ 		            - ellipticity:                                           1.0000000000000000     
+         ***************** Time stepping ************************
+                 - dt0:                                                   1000.0000000000000     
+                 - dt modification:                                               0
+                 - final time:                                            10000000000.000000     
+                 - max number of time steps:                                     10
+                 - time integration scheme:                                       1
+         ***************** Physics *****************************
+                 - perp. diffusion in the continuity equation:           0.76041818572743769     
+                 - perp. diffusion in the momentum equation:             0.76041818572743769     
+                 - perp. diffusion in the ions energy equation:          0.76041818572743769     
+                 - perp. diffusion in the electrons energy equation:     0.76041818572743769     
+                 - paral. diffusion for ions temperature:                 314436.67068200454     
+                 - paral. diffusion for electrons temperature:            10481222.356066819     
+                 - temperature exchange coefficient ions/electrons:      -578.65807886487119     
+                 - temperature diffusion exponential:                     2.5000000000000000     
+                 - reference Mach number:                                 12.492369431566924     
+                 - gamma for Bohm boundary condition on ions:             2.5000000000000000     
+                 - gamma for Bohm boundary condition for electrons:       4.5000000000000000     
+              - Zeff                                                   1.0000000000000000     
+              - Ohmic heating                                          4.7999999999999997E-014
+                 - diffusion in the neutral equation:                     7604181.8572743768     
+                 - recycling coefficient in the neutral equation:        0.99800000000000000     

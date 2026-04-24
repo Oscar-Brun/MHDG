@@ -27,7 +27,7 @@
                                         ! condition (only works if steady=.false.)
     diffred             = 0.6  ! Reduction factor of the diffusion for psdtime simulation (set for 20*diff_x)
     !diffred             = 0.76923076923
-    diffmin             = 0.001           ! Minimum value of the diffusion for a psdtime simulation
+    diffmin             = 0.1           ! Minimum value of the diffusion for a psdtime simulation
     shockcp             = 0             ! Shock capturing option
                                         ! 0 - No shock capturing
                                         ! 1 - Constant in each element
@@ -66,7 +66,7 @@
 /
 
 &INPUT_LST
-    field_path          = '/home/obrun/MHDG_data/WEST/data/B_field_k_5_57929.h5'  ! Path to Bfield h5 file. 
+    field_path          = '/home/obrun/MHDG_data/WEST/data/B_field_k_5_57929.h5'   ! Path to Bfield h5 file. 
                                                                         ! If switch%ME = .true. then omit numbering part like 'B_field/WEST_54487'
                                                                         ! If switch%ME = .false. then put the full part 'B_field/WEST_54487_0000.h5'
     field_dimensions(1) = 2000                                   ! 1st dimension dimensions of magnetic field file 
@@ -94,7 +94,7 @@
     impurity_concentration_dimension = 10000
     zeff_path = '/path/where/to/read/zeff/'
     zeff_dimension = 10000
-    diffusion_1D_path = '/path/where/to/read/1d/diffsion/
+    diffusion_1D_path = '/path/where/to/read/1d/diffsion/'
 /
 
 &NUMER_LST
@@ -103,7 +103,7 @@
     tau(3)              = 1.E+0         ! Stabilization parameter 3rd equation
     tau(4)              = 1.E+0         ! Stabilization parameter 4th equation
     tau(5)              = 1.E-0         ! Stabilization parameter 5th equation
-    nrp                 = 3          ! Max number of Newton-Raphson iterations
+    nrp                 = 40          ! Max number of Newton-Raphson iterations
     tNR                 = 2e-4          ! Tolerance of the Newton-Raphson scheme
     tTM                 = 1e-8          ! Tolerance for the steady state achievement
     div                 = 1e5           ! Divergence of Newton-Raphon iteration
@@ -136,11 +136,11 @@
                                         ! 2 - Linear interpolation between nodes
                                         ! 3 - Linear interpolation between nodes+save parameter
     evaluator		= 0		! Mixed, indicator, estimator [0,1,2]
-    param_est = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10		! Specify all physical variables(gradients) to which you would like to apply estimator
+    param_est = 1, 2, 7, 8		! Specify all physical variables(gradients) to which you would like to apply estimator
     thr_ind		= 1e-20		! Catch oscillations if higher than this value (indicator)
     quant_ind		= 1		! 1,2,3 (physical variable(s), gradient of variable(s), both)
     n_quant_ind = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10		! Specify all physical variables(gradients) to which you would like to apply indicator
-    tol_est		= 1.e-1	! Difference between p+1 and p solution (estimator)
+    tol_est		= 5.e-2	! Difference between p+1 and p solution (estimator)
     difference		= 1		! Type of difference: relative, absolute [0,1]
     time_adapt		= .true.	! Refine at times steps (pseudo or not)
     NR_adapt		= .false.	! Refine at NR steps (pseudo or not)
@@ -151,7 +151,7 @@
     osc_adapt		= .true.	! Refine if oscillations are higher than threshold
     osc_tol		= -2.		! Refine if oscillations are higher than this threshold, only if osc_adapt = .true.
     osc_check		= -3.		! Save the solution as checkpoint if the maximum value of oscillations are lower than this threshold (-100 for no oscillations at all)
-    geometry_path	= '/path/to/geo/file/from/gmesh/geometry.geo
+    geometry_path	= '/home/obrun/MHDG_data/WEST/data/WEST_57929_11.geo'
 /
 
 &GEOM_LST
@@ -175,7 +175,7 @@
 
 
 &TIME_LST
-    dt0                 = 1e2        ! Initial time step
+    dt0                 = 3e9        ! Initial time step
     nts                 = 10           ! Max number of time iterations to do in the current session (only for transient simulations) 30
     tfi                 = 1e10           ! Final time: the simulation stops when this time is reached
     tsw                 = 0             ! Switch to modify the time step
@@ -186,12 +186,12 @@
 
 &PHYS_LST
     ! ****** Diffusion parameters in m^2/s (start at 20*diff_x if psdtime = true)
-    diff_n = 20.! diffusion in the continuity equation
-    diff_u =  20.! diffusion in the momentum equation
-    diff_e = 20. ! perpendicular diffusion for the energy equation
-    diff_ee =    20. ! perpendicular diffusion in the electron temperature equation (for the TiTe model)
-    diff_vort =  20.! diffusion in the vorticity equation
-    diff_nn = 2e8 ! max diffusion for neutral equation or if used DCONSTANTNEUTRALDIFF flag, then the value of neutral diffusion
+    diff_n = 20! diffusion in the continuity equation
+    diff_u =  20! diffusion in the momentum equation
+    diff_e = 20 ! perpendicular diffusion for the energy equation
+    diff_ee =    20 ! perpendicular diffusion in the electron temperature equation (for the TiTe model)
+    diff_vort =  20 ! diffusion in the vorticity equation
+    diff_nn = 2e8 !max diffusion for neutral equation or if used DCONSTANTNEUTRALDIFF flag, then the value of neutral diffusion
     I_0 = 0.3     ! [MA] Plasma current at flat-top for diffusion in moving equilibrium
     ! external heating in the form of shifted 2D gaussian ~exp(-(r-(R0+dr)**2/sigmar**2))*exp(-(z-(Z0+dz)**2/sigmaz**2))
     heating_power = 0.              ! [W] Total power of heating 
@@ -204,15 +204,9 @@
     Re                  = 0.998     ! Recycling coefficient 0.997
     Re_pump             = 0.95     ! Recycling coefficient in the pump region
     apply_trim          = .false.  ! if apply or not trim reflection coefficient RN*Re or RN*Re_pump
-    puff                = 4e20 ! puff coefficient (particles per second in the whole puff area)
+    puff                = 2e20 ! puff coefficient (particles per second in the whole puff area)
     impurity_name       = 'W' ! name of impurity
-    impurity_concentration = 0.!fraction of electron density considered as impurity
-    feedback_propotional_gain = 10.e-21 !100.e-21  10.e-21
-    feedback_integral_gain = 200.e-22 !1000 200
-    feedback_derivative_gain = 8.e-22
-    feedback_propotional_gain_xpr = 1.e-22 
-    feedback_integral_gain_xpr = 2.e-22
-    feedback_derivative_gain_xpr = 0.5e-23
+    impurity_concentration = 3.647395612815730E-004!fraction of electron density considered as impurity
     cryopump_power      = 10.      ! cryopump power in [m^3/s]
     density_source      = 1.59      ! amplitude of the truncated gaussian density source for WEST with core (case 52)
     ener_source_e       = 150.      ! amplitude of the truncated ion energy source (case 52 and 81)
@@ -228,7 +222,7 @@
     !puff               = 1.8e-6
     !puff               = 2.e-5
     ! ****** Ohmic heating: only for testcase 54 with core
-    Zeff                = 1.
+    Zeff                = 1
     Pohmic              = 4.8e-14       ! Ohmic Heating
     ! ****** Background temperature in eV for isothermal model (default is 50 eV)
     Tbg                 = 50

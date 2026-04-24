@@ -1,0 +1,302 @@
+hwloc/linux: Ignoring PCI device with non-16bit domain.
+Pass --enable-32bits-pci-domain to configure to support such devices
+(warning: it would break the library ABI, don't enable unless really needed).
+hwloc/linux: Ignoring PCI device with non-16bit domain.
+Pass --enable-32bits-pci-domain to configure to support such devices
+(warning: it would break the library ABI, don't enable unless really needed).
+ STARTING
+ Using           24  threads
+ Adimensionalizing input values
+                                                                       
+                                                                       
+ ------------------------  MHDG SIMULATION IN 2D ----------------------
+                                                                       
+  MODEL: N-Gamma-Ti-Te with neutral                                    
+                                                                       
+ ----------------------------------------------------------------------
+   Simulation type: Time advancing simulation
+ ----------------------------------------------------------------------
+ Parameter file loaded:
+         ***************** Geometry ****************************
+                 - R0:                                                    3.3999999999999999     
+                 - Security factor:                                       3.5000000000000000     
+       	***************** Magnetic ****************************
+ 		            - RMP amplitude:                                         5.0000000000000002E-005
+ 		            - RMP coil number:                                               8
+ 		            - RMP coil toroidal elongation:                         0.39269910000000002     
+ 		            - RMP parity:                                                   -1
+ 		            - RMP row number:                                                2
+ 		            - Ripple amplitude:                                      5.0000000000000001E-004
+ 		            - Ripple coil number:                                           18
+ 		            - triangularity:                                         0.0000000000000000     
+ 		            - ellipticity:                                           1.0000000000000000     
+         ***************** Time stepping ************************
+                 - dt0:                                                   1000.0000000000000     
+                 - dt modification:                                               0
+                 - final time:                                            10000000000.000000     
+                 - max number of time steps:                                     10
+                 - time integration scheme:                                       1
+         ***************** Physics *****************************
+                 - perp. diffusion in the continuity equation:           0.76041818572743769     
+                 - perp. diffusion in the momentum equation:             0.76041818572743769     
+                 - perp. diffusion in the ions energy equation:          0.76041818572743769     
+                 - perp. diffusion in the electrons energy equation:     0.76041818572743769     
+                 - paral. diffusion for ions temperature:                 314436.67068200459     
+                 - paral. diffusion for electrons temperature:            10481222.356066819     
+                 - temperature exchange coefficient ions/electrons:      -578.65807886487107     
+                 - temperature diffusion exponential:                     2.5000000000000000     
+                 - reference Mach number:                                 12.492369431566924     
+                 - gamma for Bohm boundary condition on ions:             2.5000000000000000     
+                 - gamma for Bohm boundary condition for electrons:       4.5000000000000000     
+              - Zeff                                                   1.0000000000000000     
+              - Ohmic heating                                          4.7999999999999997E-014
+                 - diffusion in the neutral equation:                     7604181.8572743768     
+                 - recycling coefficient in the neutral equation:        0.99800000000000000     
+                 - recycling coefficient pump in the neutral equation:   0.94999999999999996     
+                 - applying trim:                                       F
+                 - puff coefficient in the neutral equation:              4.0000000000000000E+020
+                 - cryopump power coefficient in the neutral equation:    10.000000000000000     
+                 - flux limiter applied:                                F
+                 - T_maxi for the flux limiter:                          1.0000000000000000     
+                 - T_maxe for the flux limiter:                          1.0000000000000000     
+                 - impurity name:                                     W
+                 - impurity concentration:                               0.0000000000000000     
+                 - import 1D diffusion profile:                        F
+                 - particle source at core:                               0.0000000000000000     
+                 - energy source at core:                                 20000000.000000000     
+                 - constant for the momentum equation (isoth)             24.984738863133849     
+                 - diagonal implicit sources                              0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000     
+         ***************** Switches ****************************
+                 - stady state simulation:                              F
+                 - axisym:                                              T
+   Initializing with analytical solution at nodes                    
+                 - driftdia:                                            F
+                 - driftexb:                                            F
+                 - test case:                                                    54
+                 - Ohmic heating:                                       T
+                 - Moving equilibrium:                                  F
+                 - Diffusion adjusted to plasma current:                F
+                 - RMP:                                                 F
+                 - Ripple:                                              F
+                 - shockcp:                                                       0
+                 - minrho:                                                9.9999999999999998E-013
+                 - logrho:                                              F
+                 - thresh:                                                        0
+                 - filter:                                              F
+                 - decoup:                                              F
+                 - ckeramp:                                             F
+                 - saveNR:                                              T
+                 - saveTau:                                             F
+                 - transport_1d:                           F
+                 - transport_model_path:                  transport_model.nml
+                 - rho_core (transport model):              0.80000000000000004     
+                 - rho_edge (transport model):              0.98999999999999999     
+                 - rho_diffusion_model_max (transport model):          1.0000000000000000     
+                 - c_bohm_i (transport model):              1.6000000000000001E-004
+                 - c_gyrobohm_i (transport model):          1.7500000000000002E-002
+                 - c_bohm_e (transport model):              8.0000000000000007E-005
+                 - c_gyrobohm_e (transport model):          3.5000000000000003E-002
+                 - c_bohm_n (transport model):              1.0000000000000000     
+                 - prandtl (transport model):               1.0000000000000000     
+                 - pinch_model (transport model):                   1
+                 - c_pinch (transport model):              0.50000000000000000     
+                 - nu_th (transport model):                 4.0000000000000001E-002
+         ***************** Numerics ****************************
+                 - stabilization type:                                            5
+                 - tau(1):                                                1.0000000000000000     
+                 - tau(2):                                                1.0000000000000000     
+                 - tau(3):                                                1.0000000000000000     
+                 - tau(4):                                                1.0000000000000000     
+                 - tau(5):                                                1.0000000000000000     
+                 - max number of N-R iterations:                                  3
+                 - tolerance for the N-R scheme:                          2.0000000000000001E-004
+                 - tolerance for the steady state achievement:            1.0000000000000000E-008
+                 - using a dumping factor for Newton-Raphson:            0.10000000000000001     
+                 - dumping for ExB term:          1.0000000000000000     
+                 - type of bohm boundary condition:                                0
+         ***************** Linear solver params******************
+                 - Library used for the linear system:   PASTIX      
+         
+
+LOADING GMSH FILE
+
+  Node data read from file "./Meshes/TCV_smooth_coarse_P1.msh"
+
+  Number of nodes =  550
+  Spatial dimension =    2
+  Number of elements = 1098
+  Element order =    2
+ Loading mesh with mesh2global_var.
+         
+ *************************************************
+ *                    MESH                       *
+ *************************************************
+ Number of dimensions:                          2
+ Element type:                          triangles
+ Number of elements:                         1001
+ Number of nodes:                             550
+ Number of nodes per element:                   3
+ Number of nodes per face:                      2
+ Number of exterior faces:                     97
+  
+  
+ *************************************************
+ *                REFERENCE ELEMENT              *
+ *************************************************
+ Number of dimensions              :             2
+ Polynomial interpolation of degree:             1
+ Number of shape functions 2D:                   3
+ Number of shape functions 1D:                   2
+ Number of Gauss points 2D:                      7
+ Number of Gauss points 1D:                      3
+         
+ *************************************************
+ *                REFERENCE ELEMENT              *
+ *************************************************
+ Number of dimensions              :             2
+ Polynomial interpolation of degree:             1
+ Number of shape functions 2D:                   3
+ Number of shape functions 1D:                   2
+ Number of Gauss points 2D:                      7
+ Number of Gauss points 1D:                      3
+         
+ *************************************************
+ *                MESH PREPROCESS                *
+ *************************************************
+ Creating nodal connectivity 
+ Creating faces structures 
+ Number of interior faces:                    1453
+ Number of faces:                             1550
+ Boundary conditions preprocess 
+ *************************************************
+ *          BOUNDARY CONDITIONS                  *
+ *************************************************
+ Boundary type: Bohm for plasma, pump for neutrals on boundary flagged as: Tb_PUMP
+ Boundary type: Bohm for plasma, puff for neutrals on boundary flagged as: Tb_PUFF
+ Boundary type: Bohm on boundary flagged as: Tb_OUT
+  
+ Number of different boundaries:                 3
+ Number of Dirichlet faces:                      0
+  
+ Creating face connectivity 
+ Computing element size 
+ Done! 
+ Computing puff area
+ Puff area:    0.21865484868984905       m^2
+ Computing pump area
+ Pump area:     1.4304651700067681       m^2
+ Core area:     0.0000000000000000       m^2
+ Done! 
+ *************************************************
+ *           LOADING MAGNETIC FIELD              *
+ *************************************************
+ Magnetic field loaded from file: /home/obrun/MHDG_data/TCV-X21/TCV_X21_Bfield.h5
+
+Program received signal SIGSEGV: Segmentation fault - invalid memory reference.
+
+Backtrace for this error:
+ *************************************************
+ *          LOADING TOROIDAL CURRENT             *
+ *************************************************
+ Toroidal current loaded from file: /home/obrun/MHDG_data/TCV-X21/TCV_X21_Jtor_corrected.h5
+ I_p =    0.13137570164302428      [MA]
+ *************************************************
+ *            INITIALIZING SOLUTION              *
+ *************************************************
+ *      Initializing analytical solution         *
+ *************************************************
+ *           PRECALCULATED MATRICES              *
+ *************************************************
+ *************************************************
+ *        INITIALIZING SHOCK CAPTURING           *
+ *************************************************
+ *************************************************
+ *             INITIALIZING PUFF                 *
+ *************************************************
+ Puff is analytical
+ Output written to file /home/obrun/MHDG_data/TCV-X21/Solutions/time_init/Sol2D_TCV_smooth_coarse_P1_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0000.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     1                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    1.6420448375106491     
+ nn =    3.9281671622984691E-008
+ total n =    1.6420448767923208     
+ pump =    999999999999.99963     
+ puff =    3.9999999999999987E+020
+ plasma parallel flux =    0.0000000000000000     
+ plasma diffusion flux =    482734005546.39398     
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    722802535175932.38     
+ numerical flux =    0.0000000000000000     
+ net flux =    3.9999927571473072E+020
+  
+ ********************************************
+ *  Linear system size :        15500       *
+ *  Number of nnz      :       755600       *
+ ********************************************
+  
+ Output written to file /home/obrun/MHDG_data/TCV-X21/Solutions/time_init/Sol2D_TCV_smooth_coarse_P1_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                     2.1838559088297558     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    1.6375109486016306     
+ nn =    6.4031370724128437E-003
+ total n =    1.6439140856740435     
+ pump =    5.6197360504460256E+017
+ puff =    3.9999999999999987E+020
+ plasma parallel flux =    5.1883719382995367E+021
+ plasma diffusion flux =   -4.1594563580335096E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.1254933728036032E+021
+ numerical flux =   -1.5310342627986631E+019
+ net flux =    4.6064626072964112E+021
+ The diagonal element of the triangular factor of A,
+ U(          13 ,          13 ) is zero, so that
+ A is singular; the solution could not be computed.
+ The diagonal element of the triangular factor of A,
+ U(          13 ,          13 ) is zero, so that
+ A is singular; the solution could not be computed.
+ The diagonal element of the triangular factor of A,
+ U(          13 ,          13 ) is zero, so that
+ A is singular; the solution could not be computed.
+ The diagonal element of the triangular factor of A,
+ U(          13 ,          13 ) is zero, so that
+ A is singular; the solution could not be computed.
+ The diagonal element of the triangular factor of A,
+ U(          13 ,          13 ) is zero, so that
+ A is singular; the solution could not be computed.
+ The diagonal element of the triangular factor of A,
+ U(          13 ,          13 ) is zero, so that
+ A is singular; the solution could not be computed.
+ The diagonal element of the triangular factor of A,
+ U(          13 ,          13 ) is zero, so that
+ A is singular; the solution could not be computed.
+ The diagonal element of the triangular factor of A,
+ U(          13 ,          13 ) is zero, so that
+ A is singular; the solution could not be computed.
+#0  0x7b601e623960 in ???
+#1  0x7b601e622ac5 in ???
+#2  0x7b6015c4251f in ???
+	at ./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0
+#3  0x7b6015c453fc in __run_exit_handlers
+	at ./stdlib/exit.c:71
+#4  0x7b6015c4560f in __GI_exit
+	at ./stdlib/exit.c:143
+#5  0x7b601e625ac4 in ???
+#6  0x629ad19cda71 in ???
+#7  0x629ad1b60ee6 in ???
+#8  0x7b6016373c0d in ???
+#9  0x7b6015c94ac2 in start_thread
+	at ./nptl/pthread_create.c:442
+#10  0x7b6015d268cf in ???
+	at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
+#11  0xffffffffffffffff in ???

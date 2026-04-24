@@ -19,18 +19,18 @@ export MHDG_HWLOC_DIR=/usr/lib
 export MHDG_HDF5_DIR=/usr/lib
 
 # Set where the libraries are (if common directory)
-export MHDG_LIB_DIR=$HOME/libs
+export MHDG_LIB_DIR=$HOME/logiciels
 
 # Set where the PETSC are (if common directory)
 #export PETSC_ARCH=arch-linux-c-opt
 #export PETSC_DIR=$MHDG_LIB_DIR/petsc-3.18.0
 
 # Set the libraries (uncomment or add what you need)
-export MHDG_PASTIX_DIR=$MHDG_LIB_DIR/pastix_32
+export MHDG_PASTIX_DIR=$MHDG_LIB_DIR/pastix_install
 source $MHDG_PASTIX_DIR/bin/pastix_env
-export MHDG_SCOTCH_DIR=$MHDG_LIB_DIR/scotch_32
+export MHDG_SCOTCH_DIR=/usr
 export MHDG_GMSH_DIR=$MHDG_LIB_DIR/gmsh-4.11.1-Linux64-sdk
-export MHDG_PASTIX_DIR=$PASTIX_ROOT
+#export MHDG_PASTIX_DIR=$PASTIX_ROOT
 #export MHDG_PSBLAS_DIR=$MHDG_LIB_DIR/psblas3
 #export MHDG_MLD2P4_DIR=$MHDG_LIB_DIR/mld2p4-2
 #export MHDG_PETSC_DIR=$MHDG_LIB_DIR/petsc-3.18.0

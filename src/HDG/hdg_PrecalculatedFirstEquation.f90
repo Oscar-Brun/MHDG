@@ -21,6 +21,7 @@ SUBROUTINE HDG_precalculatedfirstequation()
   INTEGER*4             :: Ndim,Neq,N2D,Npel,Npfl,Ngfl,Ngvo
   INTEGER*4             :: iel,ifa, iface
   REAL*8,ALLOCATABLE    :: Xel(:,:),Xfl(:,:)
+  REAL*8,ALLOCATABLE    :: Aqq(:,:),Aqu(:,:,:),iAqq(:,:),exAqq(:,:)
 #ifdef TOR3D
   INTEGER*4             :: itor,itorg,iel3, i
   INTEGER*4             :: ntorloc
@@ -83,9 +84,13 @@ SUBROUTINE HDG_precalculatedfirstequation()
   ! Loop in elements
   !*****************
   !$OMP PARALLEL DEFAULT(SHARED) &
-  !$OMP PRIVATE(iel,iel3,ifa,iface,itor,itorg,tel,Xel,Xfl)
-  ALLOCATE(Xel(Mesh%Nnodesperelem,2))
-  ALLOCATE(Xfl(refElPol%Nfacenodes,2))
+  !$OMP PRIVATE(iel,iel3,ifa,iface,itor,itorg,tel,htor,Xel,Xfl,Aqq,Aqu,iAqq,exAqq)
+  ALLOCATE(Xel(Mesh%Nnodesperelem,3))
+  ALLOCATE(Xfl(refElPol%Nfacenodes,3))
+  ALLOCATE(Aqq(Npel,Npel))
+  ALLOCATE(Aqu(Npel,Npel,Ndim))
+  ALLOCATE(iAqq(Neq*Ndim*Npel,Neq*Ndim*Npel))
+  ALLOCATE(exAqq(Neq*Ndim*Npel,Neq*Ndim*Npel))
   !$OMP DO SCHEDULE(STATIC) COLLAPSE(2)
   DO itor = 1,ntorloc
      DO iel = 1,N2D
@@ -105,11 +110,11 @@ SUBROUTINE HDG_precalculatedfirstequation()
         Xel = Mesh%X(Mesh%T(iel,:),:)
 
         ! Compute the matrices for the element
-        CALL elemental_matrices_volume(iel3,Xel,tel)
+        CALL elemental_matrices_volume(iel3,Xel,tel,Aqq,Aqu,iAqq,exAqq)
 
         ! First poloidal face
         ifa = 1
-        CALL elemental_matrices_pol_faces(iel3,ifa,Xel)
+        CALL elemental_matrices_pol_faces(iel3,ifa,Xel,Aqq,Aqu,iAqq,exAqq)
 
         ! Toroidal faces
         DO ifa=1,refElPol%Nfaces
@@ -117,20 +122,20 @@ SUBROUTINE HDG_precalculatedfirstequation()
            iface = Mesh%F(iel,ifa)
            Xfl = Mesh%X(Mesh%T(iel,refElPol%face_nodes(ifa,:)),:)
            IF (iface.LE.Mesh%Nintfaces) THEN
-              CALL elemental_matrices_int_faces(iel3,ifa+1,Xfl,tel)
+              CALL elemental_matrices_int_faces(iel3,ifa+1,Xfl,tel,Aqq,Aqu,iAqq,exAqq)
            ELSE
-              CALL elemental_matrices_ext_faces(iel3,ifa+1,Xfl,tel)
+              CALL elemental_matrices_ext_faces(iel3,ifa+1,Xfl,tel,Aqq,Aqu,iAqq,exAqq)
            ENDIF
         END DO
 
         ! Second poloidal face
         ifa = refElPol%Nfaces + 2
-        CALL elemental_matrices_pol_faces(iel3,ifa,Xel)
+        CALL elemental_matrices_pol_faces(iel3,ifa,Xel,Aqq,Aqu,iAqq,exAqq)
 
      END DO
   END DO
   !$OMP END DO
-  DEALLOCATE(Xel,Xfl)
+  DEALLOCATE(Xel,Xfl,Aqq,Aqu,iAqq,exAqq)
   !$OMP END PARALLEL
 
   IF (utils%timing) THEN
@@ -146,9 +151,10 @@ CONTAINS
   !*****************************************
   ! Volume computations in 3D
   !*****************************************
-  SUBROUTINE elemental_matrices_volume(iel,Xel,tel)
+  SUBROUTINE elemental_matrices_volume(iel,Xel,tel,Aqq,Aqu,iAqq,exAqq)
     INTEGER*4,INTENT(IN)  :: iel
     REAL*8,INTENT(IN)     :: Xel(:,:),tel(:)
+    REAL*8,INTENT(INOUT)  :: Aqq(:,:),Aqu(:,:,:),iAqq(:,:),exAqq(:,:)
     INTEGER*4             :: g,NGaussPol,NGaussTor,igtor,igpol,i
     REAL*8                :: dvolu,dvolu1d,htor
     REAL*8                :: xy(Ng2D,2),teg(Ng1Dtor)
@@ -163,14 +169,11 @@ CONTAINS
     REAL*8                :: NN(Npel,Npel)
     REAL*8                :: NxNy_ax(Npel,Npel,Ndim)
     REAL*8                :: Ni(Npel),Nidvolu(Npel)
-    REAL*8,ALLOCATABLE    :: Aqq(:,:),Aqu(:,:,:)
     INTEGER*4             :: ind_ass(Npel),ind_asq(Npel)
 
     ind_ass = (/(i,i=0,Neq*(Npel - 1),Neq)/)
     ind_asq = (/(i,i=0,Neq*(Npel - 1)*Ndim,Neq*Ndim)/)
 
-    ALLOCATE(Aqq(Npel,Npel))
-    ALLOCATE(Aqu(Npel,Npel,Ndim))
     Aqq = 0.
     Aqu = 0.
 
@@ -236,8 +239,7 @@ CONTAINS
        END DO
     END DO
 
-    CALL do_assembly(Aqq,Aqu,ind_ass,ind_asq,iel)
-    DEALLOCATE (Aqq,Aqu)
+    CALL do_assembly(Aqq,Aqu,ind_ass,ind_asq,iel,iAqq,exAqq)
     NULLIFY (N1g,N2g)
 
   ENDSUBROUTINE elemental_matrices_volume
@@ -245,9 +247,10 @@ CONTAINS
   !*****************************************
   ! Poloidal faces computations
   !*****************************************
-  SUBROUTINE elemental_matrices_pol_faces(iel,ifa,Xfp)
+  SUBROUTINE elemental_matrices_pol_faces(iel,ifa,Xfp,Aqq,Aqu,iAqq,exAqq)
     INTEGER*4,INTENT(IN)  :: iel,ifa
     REAL*8,INTENT(IN)     :: Xfp(:,:)
+    REAL*8,INTENT(INOUT)  :: Aqq(:,:),Aqu(:,:,:),iAqq(:,:),exAqq(:,:)
     INTEGER*4             :: g,NGauss,i
     REAL*8                :: dsurf(Ng2d)
     REAL*8                :: xy(Ng2d,2)
@@ -308,9 +311,10 @@ CONTAINS
   !*****************************************
   !  Toroidal interior faces computations
   !*****************************************
-  SUBROUTINE elemental_matrices_int_faces(iel,ifa,Xfl,tel)
+  SUBROUTINE elemental_matrices_int_faces(iel,ifa,Xfl,tel,Aqq,Aqu,iAqq,exAqq)
     INTEGER*4,INTENT(IN)  :: iel,ifa
     REAL*8,INTENT(IN)     :: Xfl(:,:),tel(:)
+    REAL*8,INTENT(INOUT)  :: Aqq(:,:),Aqu(:,:,:),iAqq(:,:),exAqq(:,:)
     INTEGER*4             :: g,igtor,igpol,i,j
     REAL*8                :: xyf(Ng1Dpol,2)
     REAL*8                :: xyDer(Ng1Dpol,2)
@@ -380,9 +384,10 @@ CONTAINS
   !*****************************************
   ! Toroidal exterior faces computations
   !*****************************************
-  SUBROUTINE elemental_matrices_ext_faces(iel,ifa,Xfl,tel)
+  SUBROUTINE elemental_matrices_ext_faces(iel,ifa,Xfl,tel,Aqq,Aqu,iAqq,exAqq)
     INTEGER*4,INTENT(IN)  :: iel,ifa
     REAL*8,INTENT(IN)     :: Xfl(:,:),tel(:)
+    REAL*8,INTENT(INOUT)  :: Aqq(:,:),Aqu(:,:,:),iAqq(:,:),exAqq(:,:)
     INTEGER*4             :: g,igtor,igpol,i,j
     REAL*8                :: xyf(Ng1Dpol,2)
     REAL*8                :: xyDer(Ng1Dpol,2)
@@ -464,10 +469,14 @@ CONTAINS
   !*****************
   ! Loop in elements
   !*****************
+  !$OMP PARALLEL DEFAULT(SHARED) &
+  !$OMP PRIVATE(iel,ifa,iface,Xel,Xfl,Aqq,Aqu,iAqq,exAqq)
   ALLOCATE(Xel(Mesh%Nnodesperelem,2))
   ALLOCATE(Xfl(refElPol%Nfacenodes,2))
-  !$OMP PARALLEL DEFAULT(SHARED) &
-  !$OMP PRIVATE(iel,ifa,iface,Xel,Xfl)
+  ALLOCATE(Aqq(Npel,Npel))
+  ALLOCATE(Aqu(Npel,Npel,Ndim))
+  ALLOCATE(iAqq(Neq*Ndim*Npel,Neq*Ndim*Npel))
+  ALLOCATE(exAqq(Neq*Ndim*Npel,Neq*Ndim*Npel))
 
   !$OMP DO SCHEDULE(STATIC)
   DO iel = 1,N2D
@@ -476,7 +485,7 @@ CONTAINS
      Xel = Mesh%X(Mesh%T(iel,:),:)
 
      ! Compute the matrices for the element
-     CALL elemental_matrices_volume(iel,Xel)
+     CALL elemental_matrices_volume(iel,Xel,Aqq,Aqu,iAqq,exAqq)
 
      ! Loop in local faces
      DO ifa=1,refElPol%Nfaces
@@ -484,22 +493,21 @@ CONTAINS
         iface = Mesh%F(iel,ifa)
         Xfl = Mesh%X(Mesh%T(iel,refElPol%face_nodes(ifa,:)),:)
         IF (iface.LE.Mesh%Nintfaces) THEN
-           CALL elemental_matrices_int_faces(iel,ifa,Xfl)
+           CALL elemental_matrices_int_faces(iel,ifa,Xfl,Aqq,Aqu,iAqq,exAqq)
         ELSE
            IF (Mesh%periodic_faces(iface-Mesh%Nintfaces).EQ.0) THEN
-              CALL elemental_matrices_ext_faces(iel,ifa,Xfl)
+              CALL elemental_matrices_ext_faces(iel,ifa,Xfl,Aqq,Aqu,iAqq,exAqq)
            ELSE
               ! periodic face
-              CALL elemental_matrices_int_faces(iel,ifa,Xfl)
+              CALL elemental_matrices_int_faces(iel,ifa,Xfl,Aqq,Aqu,iAqq,exAqq)
            ENDIF
         ENDIF
      END DO
 
   END DO
   !$OMP END DO
+  DEALLOCATE(Xel,Xfl,Aqq,Aqu,iAqq,exAqq)
   !$OMP END PARALLEL
-
-  DEALLOCATE(Xel,Xfl)
 
   IF (utils%timing) THEN
      CALL cpu_TIME(timing%tpe1)
@@ -513,9 +521,10 @@ CONTAINS
   !*****************************************
   ! Volume computations in 2D
   !*****************************************
-  SUBROUTINE elemental_matrices_volume(iel,Xel)
+  SUBROUTINE elemental_matrices_volume(iel,Xel,Aqq,Aqu,iAqq,exAqq)
     INTEGER*4,INTENT(IN)  :: iel
     REAL*8,INTENT(IN)     :: Xel(:,:)
+    REAL*8,INTENT(INOUT)  :: Aqq(:,:),Aqu(:,:,:),iAqq(:,:),exAqq(:,:)
     INTEGER*4             :: g,NGauss,i
     REAL*8                :: dvolu
     REAL*8                :: xy(Ngvo,2)
@@ -527,7 +536,6 @@ CONTAINS
     REAL*8                :: Nxg(Npel),Nyg(Npel),Nx_ax(Npel)
     REAL*8                :: NN(Npel,Npel)
     REAL*8                :: NxNy_ax(Npel,Npel,Ndim)
-    REAL*8,ALLOCATABLE    :: Aqq(:,:),Aqu(:,:,:)
     INTEGER*4             :: ind_ass(Npel),ind_asq(Npel)
     REAL*8,PARAMETER     :: tol = 1e-12
 
@@ -537,8 +545,6 @@ CONTAINS
     ! Gauss points position
     xy = MATMUL(refElPol%N2D,Xel)
 
-    ALLOCATE(Aqq(Npel,Npel))
-    ALLOCATE(Aqu(Npel,Npel,Ndim))
     Aqq = 0.
     Aqu = 0.
 
@@ -581,18 +587,18 @@ CONTAINS
        ! Local assembly
        CALL assemblyVolumeContribution(NxNy_ax,NN,Aqq,Aqu)
     END DO
-    CALL do_assembly(Aqq,Aqu,ind_ass,ind_asq,iel)
+    CALL do_assembly(Aqq,Aqu,ind_ass,ind_asq,iel,iAqq,exAqq)
 
-    DEALLOCATE (Aqq,Aqu)
 
   ENDSUBROUTINE elemental_matrices_volume
 
   !*****************************************
   ! Interior faces computations
   !*****************************************
-  SUBROUTINE elemental_matrices_int_faces(iel,ifa,Xfl)
+  SUBROUTINE elemental_matrices_int_faces(iel,ifa,Xfl,Aqq,Aqu,iAqq,exAqq)
     INTEGER*4,INTENT(IN)  :: iel,ifa
     REAL*8,INTENT(IN)     :: Xfl(:,:)
+    REAL*8,INTENT(INOUT)  :: Aqq(:,:),Aqu(:,:,:),iAqq(:,:),exAqq(:,:)
     INTEGER*4             :: g,NGauss,i
     REAL*8                :: dline,xyDerNorm_g
     REAL*8                :: xyf(Ngfl,2)
@@ -645,9 +651,10 @@ CONTAINS
   !*****************************************
   ! Exterior faces computations
   !*****************************************
-  SUBROUTINE elemental_matrices_ext_faces(iel,ifa,Xfl)
+  SUBROUTINE elemental_matrices_ext_faces(iel,ifa,Xfl,Aqq,Aqu,iAqq,exAqq)
     INTEGER*4,INTENT(IN)  :: iel,ifa
     REAL*8,INTENT(IN)     :: Xfl(:,:)
+    REAL*8,INTENT(INOUT)  :: Aqq(:,:),Aqu(:,:,:),iAqq(:,:),exAqq(:,:)
     INTEGER*4             :: g,NGauss,i
     REAL*8                :: dline,xyDerNorm_g
     REAL*8                :: xyf(Ngfl,2)
@@ -704,14 +711,11 @@ CONTAINS
 
   ENDSUBROUTINE assemblyVolumeContribution
 
-  SUBROUTINE do_assembly(Aqq,Aqu,ind_ass,ind_asq,iel)
-    REAL*8,INTENT(in)    :: Aqq(:,:),Aqu(:,:,:)
+  SUBROUTINE do_assembly(Aqq,Aqu,ind_ass,ind_asq,iel,iAqq,exAqq)
+    REAL*8,INTENT(inout) :: Aqq(:,:),Aqu(:,:,:),iAqq(:,:),exAqq(:,:)
     INTEGER*4,INTENT(in) :: iel,ind_ass(:),ind_asq(:)
     INTEGER :: j,k
     INTEGER*4,DIMENSION(Npel) :: ind_i,ind_j
-    REAL*8,ALLOCATABLE :: iAqq(:,:),exAqq(:,:)
-    ALLOCATE(iAqq(Neq*Ndim*Npel,Neq*Ndim*Npel))
-    ALLOCATE(exAqq(Neq*Ndim*Npel,Neq*Ndim*Npel))
     iAqq = 0.
     exAqq = 0.
     DO j = 1,Neq
@@ -724,7 +728,7 @@ CONTAINS
     END DO
     CALL invert_matrix(exAqq,iAqq)
     elMat%iAqq(:,:,iel)=elMat%iAqq(:,:,iel)+iAqq
-    DEALLOCATE(iAqq,exAqq)
+    ! Matrices are deallocated at the end of the parallel region
 
   ENDSUBROUTINE do_assembly
 

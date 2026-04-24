@@ -123,7 +123,7 @@ SUBROUTINE READ_input()
   ! Reading the file
   uinput = 100
   diagsource = 0.
-  OPEN (uinput, file='param.txt', status='unknown')
+  OPEN (uinput, file='param.txt', status='old')
   READ (uinput, SWITCH_LST)
   READ (uinput, INPUT_LST)
   READ (uinput, NUMER_LST)

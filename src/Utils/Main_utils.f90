@@ -73,11 +73,45 @@ CONTAINS
   SUBROUTINE domain_decomposition()
     IF(MPIvar%glob_size .GT. 1) THEN
        ! split the mesh
-       
+
       CALL free_mesh_loc(Mesh_glob)
       CALL deep_copy_mesh_struct(Mesh, Mesh_glob)
       Mesh_glob%X = Mesh_glob%X*phys%lscale
       CALL split_mesh(MPIvar%glob_size, 3 , .FALSE.)
+
+      ! Ensure ghost arrays are allocated before mesh_preprocess calls
+      ! CreateFaceConnectivity, which reads Mesh%ghostFaces under -DPARALL.
+      ! split_mesh fills the local Mesh struct but may not have allocated
+      ! these pointers; we allocate them here if still unassociated.
+      IF (.NOT. ASSOCIATED(Mesh%ghostFaces)) THEN
+        ALLOCATE(Mesh%ghostFaces(Mesh%Nfaces))
+        Mesh%ghostFaces = 0
+      END IF
+      IF (.NOT. ASSOCIATED(Mesh%ghostElems)) THEN
+        ALLOCATE(Mesh%ghostElems(Mesh%Nelems))
+        Mesh%ghostElems = 0
+      END IF
+      IF (.NOT. ASSOCIATED(Mesh%ghostPro)) THEN
+        ALLOCATE(Mesh%ghostPro(Mesh%Nfaces))
+        Mesh%ghostPro = 0
+      END IF
+      IF (.NOT. ASSOCIATED(Mesh%ghostLoc)) THEN
+        ALLOCATE(Mesh%ghostLoc(Mesh%Nfaces))
+        Mesh%ghostLoc = 0
+      END IF
+      IF (.NOT. ASSOCIATED(Mesh%loc2glob_el)) THEN
+        ALLOCATE(Mesh%loc2glob_el(Mesh%Nelems))
+        Mesh%loc2glob_el = [(i, i = 1, Mesh%Nelems)]
+      END IF
+      IF (.NOT. ASSOCIATED(Mesh%loc2glob_fa)) THEN
+        ALLOCATE(Mesh%loc2glob_fa(Mesh%Nfaces))
+        Mesh%loc2glob_fa = [(i, i = 1, Mesh%Nfaces)]
+      END IF
+      IF (.NOT. ASSOCIATED(Mesh%loc2glob_nodes)) THEN
+        ALLOCATE(Mesh%loc2glob_nodes(Mesh%Nnodes))
+        Mesh%loc2glob_nodes = [(i, i = 1, Mesh%Nnodes)]
+      END IF
+
       CALL mesh_preprocess(ierr)
 
       WRITE (nid, *) MPIvar%glob_id + 1
@@ -829,11 +863,17 @@ ENDSUBROUTINE update_delta_te
          CALL mesh_preprocess_serial(ierr)
          CALL set_order_mesh(switch%order_2d)
          CALL free_reference_element_pol(refElPol)
+         CALL create_reference_element(refElPol, 2, verbose = 0)
          Mesh%X = Mesh%X*phys%lscale
          Mesh%xmax = Mesh%xmax*phys%lscale
          Mesh%xmin = Mesh%xmin*phys%lscale
          Mesh%ymax = Mesh%ymax*phys%lscale
          Mesh%ymin = Mesh%ymin*phys%lscale
+         CALL mesh_preprocess_serial(ierr)
+         IF(ierr .EQ. 0) THEN
+            WRITE(*,*) "Problem in mesh_preprocess after promotion in load_mesh. STOP."
+            STOP
+         ENDIF
       ENDIF
 
       IF(switch%gmsh2h5) THEN
