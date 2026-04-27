@@ -533,6 +533,9 @@ CONTAINS
   REAL*8                    :: uex(refElPol%Ngauss1d,phys%neq)
   REAL*8                    :: diff_iso_fac(phys%neq,phys%neq,refElPol%Ngauss1d)
   REAL*8                    :: diff_ani_fac(phys%neq,phys%neq,refElPol%Ngauss1d)
+#ifdef NEUTRAL
+  REAL*8                    :: deff_nn_new(refElPol%Ngauss1d)
+#endif
   real*8                    :: q_cylfl(refElPol%Nfacenodes),q_cyl(refElPol%Ngauss1d)
   real*8                    :: omegafl(refElPol%Nfacenodes),omega(refElPol%Ngauss1d)
 #ifdef PARALL
@@ -699,15 +702,21 @@ CONTAINS
       CALL transport_model_1d%apply_1D_diffusion(rho_pol_norm,diff_iso_fac,diff_ani_fac)
     ENDIF
 
-    if (save_tau) then
-       indtausave = (ifa - 1)*refElPol%Ngauss1d+(/(i,i=1,refElPol%Ngauss1d)/)
-       phys%diff_nn_Bou(indtausave) = diff_iso_fac(5,5,:)
-     ENDIF
+    indtausave = (ifa - 1)*refElPol%Ngauss1d+(/(i,i=1,refElPol%Ngauss1d)/)
 
     ! Physical variables at Gauss points (division by 0 during convergence test!!!)
      IF ( switch%testcase .NE. 2 ) THEN
-    CALL cons2phys(ufg,upg)
-    end if
+      CALL cons2phys(ufg,upg)
+#ifdef NEUTRAL
+      IF (switch%flux_limiter_neutral) THEN
+        CALL apply_neutral_flux_limiter_to_diffusion(qfg,upg,diff_iso_fac,phys%deff_nn_prev_Bou(indtausave),deff_nn_new)
+        phys%deff_nn_prev_Bou(indtausave) = deff_nn_new
+      END IF
+#endif
+    END IF
+    IF (save_tau) THEN
+      phys%diff_nn_Bou(indtausave) = diff_iso_fac(5,5,:)
+    END IF
 
     ! Physical variables at Gauss points with analytical sol
     CALL cons2phys(uex,uexpg)

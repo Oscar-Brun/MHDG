@@ -4,14 +4,13 @@
                                         ! .true.  = steady state simulation
     read_gmsh           = .true.	! .true. = mesh is read from msh/mesh file format
     readMeshFromSol     = .false.	! .true. = mesh is read from solution file
-    set_2d_order	= .true.	! .true. = set the order of the 2d polynomial if not set already 
+    set_2d_order	= .false.	! .true. = set the order of the 2d polynomial if not set already 
     order_2d = 8 ! if read_gmsh = .true. and set_2d_order = .true., order of the 2d polynomial
     axisym              = .true.        ! Is it an axisymmetric simulation?
                                         ! true = yes (even for magnetic perturbation)
                                         ! false = no
     init                = 1             ! Initialization type: 1-analytical at nodes; 2-L2 projection
     flux_limiter        = .false.       ! use flux limiter for ion and electron parallel conductive heat fluxes (with provided c_fli,c_fle in physics)
-    flux_limiter_neutral = .false.      ! use neutral free-streaming flux limiter (acts on Dnn -> Deff)
     external_heating    = .false.       ! True will use external from the file provided in INPUT_LST
     impurity_radiation  = .false.        ! to take into account impurity radiaion with concentration provided in PHYS_LST
     import_diffusion_1D = .false.        ! Import or not additional profile of diffuion in 1D as function of rho_pol, supply path to the file
@@ -63,6 +62,7 @@
     pertini             = 0             ! Add perturbation. 0-no perturbation; 1-sinusoidal perturbation; 2-blob
     logrho              = .false.
     bxgradb             = .false.       ! Consider the term in BxGradB in the vorticity equation
+    neutral_fluxlim = .false.
 
 /
 
@@ -70,7 +70,7 @@
     field_path          = '/home/obrun/MHDG_data/WEST/data/B_field_k_5_57929.h5'  ! Path to Bfield h5 file. 
                                                                         ! If switch%ME = .true. then omit numbering part like 'B_field/WEST_54487'
                                                                         ! If switch%ME = .false. then put the full part 'B_field/WEST_54487_0000.h5'
-    field_dimensions(1) = 2000                                 ! 1st dimension dimensions of magnetic field file 
+    field_dimensions(1) = 2000                                   ! 1st dimension dimensions of magnetic field file 
     field_dimensions(2) = 2000                                   ! 2nd dimension dimensions of magnetic field file
     field_from_grid = .true.                                   ! true then reads from cartesian grid and then biineary interpolates on nodes
                                                                 ! false then reads from files with field on nodes
@@ -80,9 +80,9 @@
     jtor_path           = '/home/obrun/MHDG_data/WEST/data/Jtor_k_5_57929_clean.h5'    ! Path to jtor h5 file. 
                                                                         ! If switch%ME = .true. then omit numbering part like 'Jtor/WEST_54487_Jtor'
                                                                         ! If switch%ME = .false. then put the full part 'Jtor/WEST_54487_Jtor_0000.h5'
-    jtor_dimensions(1) = 2000                                 ! 1st dimension dimensions of plasma current file 
+    jtor_dimensions(1) = 2000                                   ! 1st dimension dimensions of plasma current file 
     jtor_dimensions(2) = 2000                                   ! 2nd dimension dimensions of plasma current file
-    save_folder = '/home/obrun/MHDG_data/WEST/Solutions/diffred/'
+    save_folder = '/home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/'
     external_heating_path = '/path/where/to/read/external/heating/from.h5'
     external_heating_from_grid = .true.
     puff_path = '/path/where/to/read/puff/' ! only used in moving equilibrium
@@ -149,10 +149,10 @@
     freq_NR_adapt	= 5		! Frequency of NR refinement, only if NR_adapt = .true.
     div_adapt		= .false.	! Refine if NR diverges
     rest_adapt		= .true.	! Call adaptivity at the very beginning, only for restart simulations
-    osc_adapt		= .false.	! Refine if oscillations are higher than threshold
+    osc_adapt		= .true.	! Refine if oscillations are higher than threshold
     osc_tol		= -2.		! Refine if oscillations are higher than this threshold, only if osc_adapt = .true.
     osc_check		= -3.		! Save the solution as checkpoint if the maximum value of oscillations are lower than this threshold (-100 for no oscillations at all)
-    geometry_path	= '/MHDG/test/res/geometries/WEST_57929_11.geo'
+    geometry_path	= '/path/to/geo/file/from/gmesh/geometry.geo'
 /
 
 &GEOM_LST
@@ -176,7 +176,7 @@
 
 
 &TIME_LST
-    dt0                 = 1e3     ! Initial time step
+    dt0                 = 1e2        ! Initial time step
     nts                 = 10           ! Max number of time iterations to do in the current session (only for transient simulations) 30
     tfi                 = 1e10           ! Final time: the simulation stops when this time is reached
     tsw                 = 0             ! Switch to modify the time step
@@ -229,7 +229,7 @@
     !puff               = 1.8e-6
     !puff               = 2.e-5
     ! ****** Ohmic heating: only for testcase 54 with core
-    Zeff                = 1
+    Zeff                = 1.
     Pohmic              = 4.8e-14       ! Ohmic Heating
     ! ****** Background temperature in eV for isothermal model (default is 50 eV)
     Tbg                 = 50
@@ -262,16 +262,14 @@
     c_fle               = 2e-1            ! Fraction of the free streaming flux used in the electron flux limiter
     T_fluxlim_maxi      = 50.              ! Max ion temperature [eV] in old heat flux limiter (limiting T in T^(5/2)), put some large value to turn it off
     T_fluxlim_maxe      = 50.              ! Max eletron temperature [eV] in old heat flux limiter (limiting T in T^(5/2)), put some large value to turn it off
-    ! **** Neutral free-streaming flux limiter on Dnn (effective Deff)
-    fluxlim_nn_gamma    = 1.0              ! transition exponent (gamma)
-    fluxlim_nn_alpha    = 1.0              ! free-streaming limiter coefficient (alpha)
-    fluxlim_nn_omega    = 0.2              ! under-relaxation for Deff in implicit NR loop (omega)
     ! **** Non isothermal exponential
     epn                 = 2.5           ! exponential of the parallel diffusion for the temperature
     ! ***** Coefficients for the vorticity model
     etapar              = 1e-5
     Potfloat            = 3.
     diagsource          = 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.
+    neutral_fluxlim_omega = 1.0
+    neutral_fluxlim_nn_floor = 1e-30
 /
 
 &UTILS_LST

@@ -1335,7 +1335,7 @@ CONTAINS
       REAL*8,INTENT(IN)             :: ue(:,:),u0e(:,:,:)
       REAL*8,INTENT(OUT)            :: El_n,El_nn
       REAL*8,INTENT(OUT)            :: diff_nn_Vol_el(Ng2D),v_nn_Vol_el(Ng2D,ndim),Xg_el(Ng2D,ndim)
-      INTEGER*4                     :: g,NGauss,i
+      INTEGER*4                     :: g,NGauss,i,indsave_vol(Ng2d)
       REAL*8                        :: dvolu
       REAL*8                        :: xy(Ng2d,ndim),ueg(Ng2d,neq),u0eg(Ng2d,neq,time%tis)
       REAL*8                        :: force(Ng2d,Neq)
@@ -1365,6 +1365,9 @@ CONTAINS
     real*8                        :: th_n = 1.e-14
     real*8                        :: Vnng(Ndim)
     REAL*8                        :: external_heating_ions_gauss(Ng2d), external_heating_electrons_gauss(Ng2d)
+#ifdef NEUTRAL
+    REAL*8                        :: deff_nn_new(Ng2d)
+#endif
 
       IF (save_tau) THEN
        Xg_el = 0.
@@ -1441,6 +1444,9 @@ CONTAINS
       ueg = MATMUL(refElPol%N2D,ue)
       qeg = MATMUL(refElPol%N2D,qe)
 
+    ! Physical variables at Gauss points
+    CALL cons2phys(ueg,upg)
+
     ! Compute diffusion at Gauss points
 #ifndef KEQUATION
     CALL setLocalDiff(xy,ueg,diff_iso_vol,diff_ani_vol)
@@ -1455,6 +1461,14 @@ CONTAINS
     IF (switch%transport_1d) THEN
       CALL transport_model_1d%apply_1D_diffusion(rho_pol_norm,diff_iso_vol,diff_ani_vol)
     ENDIF
+
+#ifdef NEUTRAL
+    IF (switch%flux_limiter_neutral) THEN
+      indsave_vol = (iel - 1)*Ng2d + (/(i,i=1,Ng2d)/)
+      CALL apply_neutral_flux_limiter_to_diffusion(qeg,upg,diff_iso_vol,phys%deff_nn_prev_Vol(indsave_vol),deff_nn_new)
+      phys%deff_nn_prev_Vol(indsave_vol) = deff_nn_new
+    END IF
+#endif
 
 
     if (save_tau) then
@@ -1472,9 +1486,6 @@ CONTAINS
       DO i = 1,time%tis
          u0eg(:,:,i) = MATMUL(refElPol%N2D,u0e(:,:,i))
       END DO
-
-    ! Physical variables at Gauss points
-    CALL cons2phys(ueg,upg)
 
     ! Constant sources
     ! Body force at the integration points
@@ -1746,6 +1757,9 @@ CONTAINS
     real*8                    :: auxdiffsc(Ng1d)
     real*8                    :: q_cyl(Ng1d)
     real*8                    :: omega(Ng1d)
+#ifdef NEUTRAL
+    real*8                    :: deff_nn_new(Ng1d)
+#endif
     ind_asf = (/(i,i=0,Neq*(Npfl - 1),Neq)/)
     ind_ash = (/(i,i=0,Neq*(Npfl - 1)*Ndim,Neq*Ndim)/)
 
@@ -1798,6 +1812,9 @@ CONTAINS
     ! Gradient solution at face gauss points
       qfg = MATMUL(refElPol%N1D,qef)
 
+    ! Physical variables at face Gauss points
+    CALL cons2phys(ufg,upgf)
+
     ! Compute diffusion at faces Gauss points
 #ifndef KEQUATION
     CALL setLocalDiff(xyf,uefg,diff_iso_fac,diff_ani_fac)
@@ -1812,6 +1829,14 @@ CONTAINS
     IF (switch%transport_1d) THEN
       CALL transport_model_1d%apply_1D_diffusion(rho_pol_norm,diff_iso_fac,diff_ani_fac)
     ENDIF
+
+#ifdef NEUTRAL
+    IF (switch%flux_limiter_neutral) THEN
+      indsave = (ifa - 1)*Ngauss + (/(i,i=1,Ngauss)/)
+      CALL apply_neutral_flux_limiter_to_diffusion(qfg,upgf,diff_iso_fac,phys%deff_nn_prev_Fac(indsave),deff_nn_new)
+      phys%deff_nn_prev_Fac(indsave) = deff_nn_new
+    END IF
+#endif
     if (save_tau) then
        indsave = (ifa - 1)*Ngauss + (/(i,i=1,Ngauss)/)
        diff_nn_Fac_el(indsave) = diff_iso_fac(5,5,:)
@@ -1823,9 +1848,6 @@ CONTAINS
         diff_iso_fac(i,i,:) = diff_iso_fac(i,i,:)+auxdiffsc
          END DO
       ENDIF
-
-    ! Physical variables at face Gauss points
-    CALL cons2phys(ufg,upgf)
 
     ! Loop in 1D Gauss points
     DO g = 1,NGauss
@@ -1922,6 +1944,9 @@ CONTAINS
     real*8                    :: Vnng(Ndim)
     real*8                    :: q_cyl(Ng1d)
     real*8                    :: omega(Ng1d)
+#ifdef NEUTRAL
+    real*8                    :: deff_nn_new(Ng1d)
+#endif
     ind_asf = (/(i,i=0,Neq*(Npfl - 1),Neq)/)
     ind_ash = (/(i,i=0,Neq*(Npfl - 1)*Ndim,Neq*Ndim)/)
 
@@ -1975,6 +2000,9 @@ CONTAINS
     ! Gradient solution at face gauss points
       qfg = MATMUL(refElPol%N1D,qef)
 
+    ! Physical variables at face Gauss points
+    CALL cons2phys(ufg,upgf)
+
     ! Compute diffusion at faces Gauss points
 #ifndef KEQUATION
     CALL setLocalDiff(xyf,uefg,diff_iso_fac,diff_ani_fac)
@@ -1991,6 +2019,14 @@ CONTAINS
       CALL transport_model_1d%apply_1D_diffusion(rho_pol_norm,diff_iso_fac,diff_ani_fac)
     ENDIF
 
+#ifdef NEUTRAL
+    IF (switch%flux_limiter_neutral) THEN
+      indsave = (ifa -1)*Ngauss + (/(i,i=1,Ngauss)/)
+      CALL apply_neutral_flux_limiter_to_diffusion(qfg,upgf,diff_iso_fac,phys%deff_nn_prev_Fac(indsave),deff_nn_new)
+      phys%deff_nn_prev_Fac(indsave) = deff_nn_new
+    END IF
+#endif
+
     if (save_tau) then
        indsave = (ifa -1)*Ngauss + (/(i,i=1,Ngauss)/)
        diff_nn_Fac_el(indsave) = diff_iso_fac(5,5,:)
@@ -2002,9 +2038,6 @@ CONTAINS
         diff_iso_fac(i,i,:) = diff_iso_fac(i,i,:)+auxdiffsc
          END DO
       ENDIF
-
-    ! Physical variables at face Gauss points
-    CALL cons2phys(ufg,upgf)
 
     ! Shape function derivatives at Gauss points
       xyDer = MATMUL(refElPol%Nxi1D,Xfl)

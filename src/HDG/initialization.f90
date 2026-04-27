@@ -122,6 +122,9 @@ CONTAINS
        ALLOCATE(Mesh%Xgf(Mesh%Nelems*refElPol%Nfaces*refElPol%NGauss1D,Mesh%Ndim))
        ALLOCATE(Mesh%Xgb(Mesh%Nextfaces*refElPol%NGauss1D,Mesh%Ndim))
     END IF
+    ALLOCATE(phys%deff_nn_prev_Vol(Mesh%Nelems*refElPol%NGauss2D))
+    ALLOCATE(phys%deff_nn_prev_Fac(Mesh%Nelems*refElPol%Nfaces*refElPol%NGauss1D))
+    ALLOCATE(phys%deff_nn_prev_Bou(Mesh%Nextfaces*refElPol%NGauss1D))
 
     elmat%iAqq = 0.
     elmat%Aqu = 0.
@@ -158,6 +161,9 @@ CONTAINS
        Mesh%Xgf = 0.
        Mesh%Xgb = 0.
     END IF
+    phys%deff_nn_prev_Vol = -1.d0
+    phys%deff_nn_prev_Fac = -1.d0
+    phys%deff_nn_prev_Bou = -1.d0
 
   ENDSUBROUTINE init_elmat
 

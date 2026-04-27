@@ -408,6 +408,15 @@ CONTAINS
     IF (ALLOCATED(phys%diff_nn_Bou)) THEN
        DEALLOCATE (phys%diff_nn_Bou)
     END IF
+    IF (ALLOCATED(phys%deff_nn_prev_Vol)) THEN
+       DEALLOCATE (phys%deff_nn_prev_Vol)
+    END IF
+    IF (ALLOCATED(phys%deff_nn_prev_Fac)) THEN
+       DEALLOCATE (phys%deff_nn_prev_Fac)
+    END IF
+    IF (ALLOCATED(phys%deff_nn_prev_Bou)) THEN
+       DEALLOCATE (phys%deff_nn_prev_Bou)
+    END IF
     IF (ALLOCATED(phys%v_nn_Vol)) THEN
        DEALLOCATE (phys%v_nn_Vol)
     END IF

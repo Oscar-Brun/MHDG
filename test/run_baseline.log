@@ -1,0 +1,1128 @@
+hwloc/linux: Ignoring PCI device with non-16bit domain.
+Pass --enable-32bits-pci-domain to configure to support such devices
+(warning: it would break the library ABI, don't enable unless really needed).
+hwloc/linux: Ignoring PCI device with non-16bit domain.
+Pass --enable-32bits-pci-domain to configure to support such devices
+(warning: it would break the library ABI, don't enable unless really needed).
+ STARTING
+ Using            4  threads
+ Adimensionalizing input values
+                                                                       
+                                                                       
+ ------------------------  MHDG SIMULATION IN 2D ----------------------
+                                                                       
+  MODEL: N-Gamma-Ti-Te with neutral                                    
+                                                                       
+ ----------------------------------------------------------------------
+   Simulation type: Time advancing simulation
+ ----------------------------------------------------------------------
+ Parameter file loaded:
+         ***************** Geometry ****************************
+                 - R0:                                                    3.3999999999999999     
+                 - Security factor:                                       3.5000000000000000     
+       	***************** Magnetic ****************************
+ 		            - RMP amplitude:                                         5.0000000000000002E-005
+ 		            - RMP coil number:                                               8
+ 		            - RMP coil toroidal elongation:                         0.39269910000000002     
+ 		            - RMP parity:                                                   -1
+ 		            - RMP row number:                                                2
+ 		            - Ripple amplitude:                                      5.0000000000000001E-004
+ 		            - Ripple coil number:                                           18
+ 		            - triangularity:                                         0.0000000000000000     
+ 		            - ellipticity:                                           1.0000000000000000     
+         ***************** Time stepping ************************
+                 - dt0:                                                   100.00000000000000     
+                 - dt modification:                                               0
+                 - final time:                                            10000000000.000000     
+                 - max number of time steps:                                     10
+                 - time integration scheme:                                       1
+         ***************** Physics *****************************
+                 - perp. diffusion in the continuity equation:           0.76041818572743769     
+                 - perp. diffusion in the momentum equation:             0.76041818572743769     
+                 - perp. diffusion in the ions energy equation:          0.76041818572743769     
+                 - perp. diffusion in the electrons energy equation:     0.76041818572743769     
+                 - paral. diffusion for ions temperature:                 314436.67068200459     
+                 - paral. diffusion for electrons temperature:            10481222.356066819     
+                 - temperature exchange coefficient ions/electrons:      -578.65807886487107     
+                 - temperature diffusion exponential:                     2.5000000000000000     
+                 - reference Mach number:                                 12.492369431566924     
+                 - gamma for Bohm boundary condition on ions:             2.5000000000000000     
+                 - gamma for Bohm boundary condition for electrons:       4.5000000000000000     
+              - Zeff                                                   1.0000000000000000     
+              - Ohmic heating                                          4.7999999999999997E-014
+                 - diffusion in the neutral equation:                     7604181.8572743768     
+                 - recycling coefficient in the neutral equation:        0.99800000000000000     
+                 - recycling coefficient pump in the neutral equation:   0.94999999999999996     
+                 - applying trim:                                       F
+                 - puff coefficient in the neutral equation:              4.0000000000000000E+020
+                 - cryopump power coefficient in the neutral equation:    10.000000000000000     
+                 - flux limiter applied:                                F
+                 - T_maxi for the flux limiter:                          1.0000000000000000     
+                 - T_maxe for the flux limiter:                          1.0000000000000000     
+                 - impurity name:                                     W
+                 - impurity concentration:                               0.0000000000000000     
+                 - import 1D diffusion profile:                        F
+                 - particle source at core:                               0.0000000000000000     
+                 - energy source at core:                                 20000000.000000000     
+                 - constant for the momentum equation (isoth)             24.984738863133849     
+                 - diagonal implicit sources                              0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000        0.0000000000000000     
+         ***************** Switches ****************************
+                 - stady state simulation:                              F
+                 - axisym:                                              T
+   Initializing with analytical solution at nodes                    
+                 - driftdia:                                            F
+                 - driftexb:                                            F
+                 - test case:                                                    54
+                 - Ohmic heating:                                       T
+                 - Moving equilibrium:                                  F
+                 - Diffusion adjusted to plasma current:                F
+                 - RMP:                                                 F
+                 - Ripple:                                              F
+                 - shockcp:                                                       0
+                 - minrho:                                                9.9999999999999998E-013
+                 - logrho:                                              F
+                 - thresh:                                                        0
+                 - filter:                                              F
+                 - decoup:                                              F
+                 - ckeramp:                                             F
+                 - saveNR:                                              T
+                 - saveTau:                                             F
+                 - transport_1d:                           F
+                 - transport_model_path:                  transport_model.nml
+                 - rho_core (transport model):              0.80000000000000004     
+                 - rho_edge (transport model):              0.98999999999999999     
+                 - rho_diffusion_model_max (transport model):          1.0000000000000000     
+                 - c_bohm_i (transport model):              1.6000000000000001E-004
+                 - c_gyrobohm_i (transport model):          1.7500000000000002E-002
+                 - c_bohm_e (transport model):              8.0000000000000007E-005
+                 - c_gyrobohm_e (transport model):          3.5000000000000003E-002
+                 - c_bohm_n (transport model):              1.0000000000000000     
+                 - prandtl (transport model):               1.0000000000000000     
+                 - pinch_model (transport model):                   1
+                 - c_pinch (transport model):              0.50000000000000000     
+                 - nu_th (transport model):                 4.0000000000000001E-002
+         ***************** Numerics ****************************
+                 - stabilization type:                                            5
+                 - tau(1):                                                1.0000000000000000     
+                 - tau(2):                                                1.0000000000000000     
+                 - tau(3):                                                1.0000000000000000     
+                 - tau(4):                                                1.0000000000000000     
+                 - tau(5):                                                1.0000000000000000     
+                 - max number of N-R iterations:                                  3
+                 - tolerance for the N-R scheme:                          2.0000000000000001E-004
+                 - tolerance for the steady state achievement:            1.0000000000000000E-008
+                 - using a dumping factor for Newton-Raphson:            0.10000000000000001     
+                 - dumping for ExB term:          1.0000000000000000     
+                 - type of bohm boundary condition:                                0
+         ***************** Linear solver params******************
+                 - Library used for the linear system:   PASTIX      
+         
+
+LOADING GMSH FILE
+
+  Node data read from file "Meshes/WEST_57929_11_2k_P8.msh"
+
+  Number of nodes = ****
+  Spatial dimension =    2
+  Number of elements = 2134
+  Element order =    9
+ Loading mesh with mesh2global_var.
+         
+ *************************************************
+ *                    MESH                       *
+ *************************************************
+ Number of dimensions:                          2
+ Element type:                          triangles
+ Number of elements:                         1975
+ Number of nodes:                           63837
+ Number of nodes per element:                  45
+ Number of nodes per face:                      9
+ Number of exterior faces:                    159
+  
+  
+ *************************************************
+ *                REFERENCE ELEMENT              *
+ *************************************************
+ Number of dimensions              :             2
+ Polynomial interpolation of degree:             8
+ Number of shape functions 2D:                  45
+ Number of shape functions 1D:                   9
+ Number of Gauss points 2D:                    126
+ Number of Gauss points 1D:                     10
+         
+ *************************************************
+ *                REFERENCE ELEMENT              *
+ *************************************************
+ Number of dimensions              :             2
+ Polynomial interpolation of degree:             8
+ Number of shape functions 2D:                  45
+ Number of shape functions 1D:                   9
+ Number of Gauss points 2D:                    126
+ Number of Gauss points 1D:                     10
+         
+ *************************************************
+ *                MESH PREPROCESS                *
+ *************************************************
+ Creating nodal connectivity 
+ Creating faces structures 
+ Number of interior faces:                    2883
+ Number of faces:                             3042
+ Boundary conditions preprocess 
+ *************************************************
+ *          BOUNDARY CONDITIONS                  *
+ *************************************************
+ Boundary type: Bohm for plasma, pump for neutrals on boundary flagged as: Tb_PUMP
+ Boundary type: Bohm for plasma, puff for neutrals on boundary flagged as: Tb_PUFF
+ Boundary type: Bohm on boundary flagged as: Tb_OUT
+  
+ Number of different boundaries:                 3
+ Number of Dirichlet faces:                      0
+  
+ Creating face connectivity 
+ Computing element size 
+ Done! 
+ Computing puff area
+ Puff area:    0.38093009720477417       m^2
+ Computing pump area
+ Pump area:     2.1158123867102607       m^2
+ Core area:     0.0000000000000000       m^2
+ Done! 
+ *************************************************
+ *           LOADING MAGNETIC FIELD              *
+ *************************************************
+ Magnetic field loaded from file: /home/obrun/MHDG_data/WEST/data/B_field_k_5_57929.h5
+ *************************************************
+ *          LOADING TOROIDAL CURRENT             *
+ *************************************************
+ Toroidal current loaded from file: /home/obrun/MHDG_data/WEST/data/Jtor_k_5_57929_clean.h5
+ I_p =    0.48525216451774761      [MA]
+ *************************************************
+ *            INITIALIZING SOLUTION              *
+ *************************************************
+ *      Initializing analytical solution         *
+ *************************************************
+ *           PRECALCULATED MATRICES              *
+ *************************************************
+ *************************************************
+ *        INITIALIZING SHOCK CAPTURING           *
+ *************************************************
+ *************************************************
+ *             INITIALIZING PUFF                 *
+ *************************************************
+ Puff is analytical
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0000.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     1                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    12.015490486436518     
+ nn =    2.5958439380712435E-007
+ total n =    12.015490746020911     
+ pump =    999999999999.99927     
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    0.0000000000000000     
+ plasma diffusion flux =    1118087296406.6208     
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    803250980901219.12     
+ numerical flux =    0.0000000000000000     
+ net flux =    3.9999919463093161E+020
+  
+ ********************************************
+ *  Linear system size :       136890       *
+ *  Number of nnz      :     30156300       *
+ ********************************************
+  
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.74407388021446685     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    12.001675634406030     
+ nn =    1.2836875585068361E-002
+ total n =    12.014512509991098     
+ pump =    3.4814268792388954E+017
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    1.5019585836446852E+022
+ plasma diffusion flux =   -7.8673639596782539E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    1.5675694637066383E+022
+ numerical flux =    5.4304518594179034E+017
+ net flux =    7.6114500615567384E+021
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.62613411479898451     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.991359368067945     
+ nn =    2.3496857462238306E-002
+ total n =    12.014856225530183     
+ pump =    6.3969296721746253E+017
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    2.7417422525112697E+022
+ plasma diffusion flux =   -5.8605086370549979E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    2.8161264126209852E+022
+ numerical flux =    1.0450625399474752E+018
+ net flux =    5.5170724055305746E+021
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.50517570007408785     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.10000E+03                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  4.03929138E-02     1.00011618E+00              *
+ *       u --> -1.28883853E+00     1.30881580E+00              *
+ *      Ei -->  7.99997906E-01     1.80285215E+01              *
+ *      Ee -->  6.81593372E-01     2.30330153E+01              *
+ *      pi -->  1.64691193E-03     9.62220233E-01              *
+ *      pe -->  1.54416663E-03     1.22931436E+00              *
+ *      Ti -->  4.04436171E-02     9.62108459E-01              *
+ *      Te -->  3.63738507E-02     1.22917783E+00              *
+ *     Csi -->  9.97678906E-01     5.23204812E+00              *
+ *       M --> -5.12154311E-01     4.91927596E-01              *
+ *    rhon -->  4.02622144E-05     9.08452457E-03              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.46682316E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0001.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     2                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    11.983062255525260     
+ nn =    3.2068118129986424E-002
+ total n =    12.015130373655246     
+ pump =    8.7440397588977536E+017
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    3.7355468882383848E+022
+ plasma diffusion flux =   -4.2101495567663125E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    3.8001342939686913E+022
+ numerical flux =    1.2842012524508367E+018
+ net flux =    3.9646852967398092E+021
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.67874764997315618     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    11.972286153471032     
+ nn =    4.0891238461437426E-002
+ total n =    12.013177391932469     
+ pump =    1.0897664393506168E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    4.2582616884966842E+022
+ plasma diffusion flux =   -1.2250487175405083E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    4.2103629006189019E+022
+ numerical flux =    1.9493824140865234E+018
+ net flux =    2.1048962122930675E+021
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.55336715289569482     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.965426015039162     
+ nn =    4.8322663311524808E-002
+ total n =    12.013748678350687     
+ pump =    1.2696647504889677E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    4.6938352715261337E+022
+ plasma diffusion flux =   -9.0565185906142269E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    4.6665361226913878E+022
+ numerical flux =    2.0294944099787031E+018
+ net flux =    1.5794031770683688E+021
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.43308440211627047     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.20000E+03                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  3.76831432E-02     1.00026651E+00              *
+ *       u --> -1.85500093E+00     1.88089147E+00              *
+ *      Ei -->  7.71804615E-01     1.80548744E+01              *
+ *      Ee -->  5.99549753E-01     2.73127793E+01              *
+ *      pi -->  1.47927784E-03     9.63743950E-01              *
+ *      pe -->  1.23300585E-03     1.45795284E+00              *
+ *      Ti -->  3.78992826E-02     9.63514809E-01              *
+ *      Te -->  3.19955183E-02     1.45757133E+00              *
+ *     Csi -->  9.52893806E-01     5.49952858E+00              *
+ *       M --> -7.65036352E-01     7.37651323E-01              *
+ *    rhon -->  7.29165399E-05     1.44827084E-02              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.41388281E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0002.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     3                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    11.959814695927573     
+ nn =    5.4417309609512868E-002
+ total n =    12.014232005537085     
+ pump =    1.4159730234426734E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.0470932107560502E+022
+ plasma diffusion flux =   -6.5182943668598066E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.0347271959608094E+022
+ numerical flux =    1.9666857750394237E+018
+ net flux =    1.1760402973899799E+021
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.61361808007960894     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    11.952270058365507     
+ nn =    6.0532557024798490E-002
+ total n =    12.012802615390305     
+ pump =    1.5405590828331884E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.2040604428091865E+022
+ plasma diffusion flux =    1.0535430916377903E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.1343565415296579E+022
+ numerical flux =    2.3873808499828833E+018
+ net flux =    4.4342742924637766E+019
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.49034578569949661     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.947533617391132     
+ nn =    6.5713691045459544E-002
+ total n =    12.013247308436592     
+ pump =    1.6446792651223644E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.3354109861544487E+022
+ plasma diffusion flux =    7.9060408470306777E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.2913715578173758E+022
+ numerical flux =    2.3408410557077002E+018
+ net flux =    5.0486360458244653E+019
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.37746280406529303     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.30000E+03                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  3.53835158E-02     1.00043344E+00              *
+ *       u --> -2.10836843E+00     2.12465811E+00              *
+ *      Ei -->  7.44639278E-01     1.80792760E+01              *
+ *      Ee -->  5.46844840E-01     3.10939423E+01              *
+ *      pi -->  1.33863415E-03     9.65199321E-01              *
+ *      pe -->  1.03389791E-03     1.66006624E+00              *
+ *      Ti -->  3.64162700E-02     9.64817019E-01              *
+ *      Te -->  2.91828727E-02     1.65935654E+00              *
+ *     Csi -->  9.18623351E-01     5.72552660E+00              *
+ *       M --> -8.88484500E-01     8.63928653E-01              *
+ *    rhon -->  9.82411664E-05     1.75241354E-02              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.36779831E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0003.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     4                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    11.943632603850045     
+ nn =    6.9989098322868065E-002
+ total n =    12.013621702172912     
+ pump =    1.7295182006869033E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.4423509755383318E+022
+ plasma diffusion flux =    5.6929333488432067E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.4198736167913638E+022
+ numerical flux =    2.2629106080190653E+018
+ net flux =    5.6013644992687899E+019
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.55570360213173819     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    11.938542743129744     
+ nn =    7.4139524357852427E-002
+ total n =    12.012682267487596     
+ pump =    1.7920982856343053E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.4591550653861013E+022
+ plasma diffusion flux =    1.6040434719227668E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.4054202134573431E+022
+ numerical flux =    2.6249180963960504E+018
+ net flux =   -6.6586213282443638E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.43902445633360249     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.935345875923778     
+ nn =    7.7661873466988815E-002
+ total n =    12.013007749390766     
+ pump =    1.8443041538917780E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.4727707148677500E+022
+ plasma diffusion flux =    1.2001795772693954E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.4412717788469372E+022
+ numerical flux =    2.6090404773161334E+018
+ net flux =   -4.8442548073785197E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.33487304132280699     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.40000E+03                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  3.28570700E-02     1.00059669E+00              *
+ *       u --> -2.21773368E+00     2.22724843E+00              *
+ *      Ei -->  7.25013577E-01     1.81019996E+01              *
+ *      Ee -->  5.08475216E-01     3.44497783E+01              *
+ *      pi -->  1.24282087E-03     9.66562006E-01              *
+ *      pe -->  8.92774483E-04     1.83952601E+00              *
+ *      Ti -->  3.54235022E-02     9.66029687E-01              *
+ *      Te -->  2.71352428E-02     1.83844378E+00              *
+ *     Csi -->  8.93585387E-01     5.91895200E+00              *
+ *       M --> -9.46898688E-01     9.26164033E-01              *
+ *    rhon -->  1.17039484E-04     1.90092232E-02              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.32988948E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0004.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     5                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    11.932707154797010     
+ nn =    8.0573563749310212E-002
+ total n =    12.013280718546319     
+ pump =    1.8868111983236582E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.4834554142327631E+022
+ plasma diffusion flux =    8.6454244862141569E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.4707836561626875E+022
+ numerical flux =    2.6024662394740562E+018
+ net flux =   -3.3710921287951450E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.50654178891358748     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    11.929429748449150     
+ nn =    8.3278934798680829E-002
+ total n =    12.012708683247832     
+ pump =    1.9082606459859374E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.4483300894888849E+022
+ plasma diffusion flux =    1.5454042003756763E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.4189861411527045E+022
+ numerical flux =    2.8646241717413601E+018
+ net flux =   -8.5100835348812923E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.39746890508530741     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.927368770157116     
+ nn =    8.5575683611643708E-002
+ total n =    12.012944453768760     
+ pump =    1.9260467038849139E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.4180916966007908E+022
+ plasma diffusion flux =    1.1557203785700787E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.4051060219156181E+022
+ numerical flux =    2.8922198073017221E+018
+ net flux =   -6.2489745861494230E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.30153817114309700     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.50000E+03                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  3.07674949E-02     1.00074025E+00              *
+ *       u --> -2.26094066E+00     2.27639765E+00              *
+ *      Ei -->  7.10091684E-01     1.81233432E+01              *
+ *      Ee -->  4.79031266E-01     3.74569225E+01              *
+ *      pi -->  1.13809753E-03     9.67835286E-01              *
+ *      pe -->  7.87608857E-04     2.00038023E+00              *
+ *      Ti -->  3.44841323E-02     9.67168706E-01              *
+ *      Te -->  2.55639396E-02     1.99892277E+00              *
+ *     Csi -->  8.75287477E-01     6.08711989E+00              *
+ *       M --> -9.74053660E-01     9.60112968E-01              *
+ *    rhon -->  1.30290855E-04     1.95327374E-02              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.29899323E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0005.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     6                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    11.925666887922540     
+ nn =    8.7475042825977359E-002
+ total n =    12.013141930748517     
+ pump =    1.9404733449694303E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.3927437036449373E+022
+ plasma diffusion flux =    8.3252880528358087E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.3937239910519855E+022
+ numerical flux =    2.9231221509338214E+018
+ net flux =   -4.4134903054809956E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.46516665866174922     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    11.923709406608571     
+ nn =    8.9124964996619843E-002
+ total n =    12.012834371605191     
+ pump =    1.9358185411753252E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.3411074244767610E+022
+ plasma diffusion flux =    1.3144768098163944E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.3343527964835626E+022
+ numerical flux =    3.0844421216680346E+018
+ net flux =   -8.4578190630392221E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.36344579910733871     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.922480144888462     
+ nn =    9.0525538807637168E-002
+ total n =    12.013005683696100     
+ pump =    1.9317560163801874E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.2969015320868792E+022
+ plasma diffusion flux =    9.8275683862262999E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.3009897802126647E+022
+ numerical flux =    3.1262768055818972E+018
+ net flux =   -6.2244479909128621E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.27479069433825071     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.60000E+03                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  2.90076144E-02     1.00085240E+00              *
+ *       u --> -2.27576962E+00     2.29457481E+00              *
+ *      Ei -->  6.98373473E-01     1.81434658E+01              *
+ *      Ee -->  4.55813440E-01     4.01793174E+01              *
+ *      pi -->  1.05550595E-03     9.69021745E-01              *
+ *      pe -->  7.06572313E-04     2.14600240E+00              *
+ *      Ti -->  3.38476441E-02     9.68242570E-01              *
+ *      Te -->  2.43248992E-02     2.14420585E+00              *
+ *     Csi -->  8.61361772E-01     6.23549958E+00              *
+ *       M --> -9.86617149E-01     9.78595526E-01              *
+ *    rhon -->  1.39050004E-04     1.93991377E-02              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.27359161E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0006.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     7                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    11.921465413179684     
+ nn =    9.1683807411172435E-002
+ total n =    12.013149220590856     
+ pump =    1.9283450154822513E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.2600675697582880E+022
+ plasma diffusion flux =    7.0778804570691771E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.2735609208471542E+022
+ numerical flux =    3.1616436101259192E+018
+ net flux =   -4.4148825800093938E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.43017904553721409     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    11.920456452437376     
+ nn =    9.2572658544815500E-002
+ total n =    12.013029110982192     
+ pump =    1.9080282463432289E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.2060191920388959E+022
+ plasma diffusion flux =    1.0697090419055839E+021
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.2174353905873343E+022
+ numerical flux =    3.2495934583051771E+018
+ net flux =   -7.8252946217801404E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.33516446208312206     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.919828107397183     
+ nn =    9.3326888816172765E-002
+ total n =    12.013154996213355     
+ pump =    1.8908376930893266E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.1597951553441014E+022
+ plasma diffusion flux =    7.9953529718027400E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.1776361161516290E+022
+ numerical flux =    3.2871115345636603E+018
+ net flux =   -5.7654863141407398E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.25283723295842969     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.70000E+03                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  2.74990270E-02     1.00092504E+00              *
+ *       u --> -2.27898079E+00     2.29924986E+00              *
+ *      Ei -->  6.89011909E-01     1.81624751E+01              *
+ *      Ee -->  4.37148603E-01     4.26668870E+01              *
+ *      pi -->  9.88161488E-04     9.70112245E-01              *
+ *      pe -->  6.42396053E-04     2.27902292E+00              *
+ *      Ti -->  3.33923271E-02     9.69257019E-01              *
+ *      Te -->  2.33288331E-02     2.27695727E+00              *
+ *     Csi -->  8.50421813E-01     6.36809293E+00              *
+ *       M --> -9.92451187E-01     9.87818004E-01              *
+ *    rhon -->  1.44333094E-04     1.88715668E-02              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.25241881E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0007.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     8                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    11.919310099488882     
+ nn =    9.3950520952057109E-002
+ total n =    12.013260620440940     
+ pump =    1.8766895499029591E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.1213260422942044E+022
+ plasma diffusion flux =    5.7561482423011607E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.1449011239817002E+022
+ numerical flux =    3.3143023662297160E+018
+ net flux =   -4.0992802828874626E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.40031101851854151     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    11.918973065480433     
+ nn =    9.4298893579308582E-002
+ total n =    12.013271959059741     
+ pump =    1.8477256166550472E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.0701594434911171E+022
+ plasma diffusion flux =    8.6020762069051245E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.0952658047055857E+022
+ numerical flux =    3.3554185399144617E+018
+ net flux =   -7.0976353991194051E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.31129597828747751     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.918772150721210     
+ nn =    9.4594126446045701E-002
+ total n =    12.013366277167256     
+ pump =    1.8232674482201554E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    5.0264131523261940E+022
+ plasma diffusion flux =    6.4273221100207512E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.0546399766035487E+022
+ numerical flux =    3.3826108592159826E+018
+ net flux =   -5.2344111036462478E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.23446501576982229     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.80000E+03                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  2.61847187E-02     1.00095292E+00              *
+ *       u --> -2.27828882E+00     2.29878130E+00              *
+ *      Ei -->  6.81489221E-01     1.81804548E+01              *
+ *      Ee -->  4.11562234E-01     4.49581979E+01              *
+ *      pi -->  9.31859337E-04     9.71105535E-01              *
+ *      pe -->  5.90314771E-04     2.40147164E+00              *
+ *      Ti -->  3.30556364E-02     9.70216518E-01              *
+ *      Te -->  2.19633933E-02     2.39923516E+00              *
+ *     Csi -->  8.41625786E-01     6.48785350E+00              *
+ *       M --> -9.95186883E-01     9.92419890E-01              *
+ *    rhon -->  1.47041795E-04     1.81264768E-02              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.23451552E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0008.h5
+         
+ ***************************************************************
+ *                    Time iteration   =     9                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    11.918607503021475     
+ nn =    9.4838082803480522E-002
+ total n =    12.013445585824956     
+ pump =    1.8031591630478546E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    4.9900222064499951E+022
+ plasma diffusion flux =    4.6248765675571413E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    5.0212193254022993E+022
+ numerical flux =    3.3996269759765156E+018
+ net flux =   -3.7286237846582906E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.37454561191487917     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    11.918738617847765     
+ nn =    9.4809556101119116E-002
+ total n =    12.013548173948884     
+ pump =    1.7701236346631731E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    4.9434023431273261E+022
+ plasma diffusion flux =    6.9464437487105239E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    4.9784151488816201E+022
+ numerical flux =    3.4121907568975058E+018
+ net flux =   -6.4313036529176727E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.29087068142540379     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.918836127384219     
+ nn =    9.4784739229600679E-002
+ total n =    12.013620866613820     
+ pump =    1.7422287763021371E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    4.9035491746060440E+022
+ plasma diffusion flux =    5.1882101403124911E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    4.9393104863928607E+022
+ numerical flux =    3.4290473207886920E+018
+ net flux =   -4.7474731335493563E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.21883522836201594     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.90000E+03                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  2.47920393E-02     1.00093295E+00              *
+ *       u --> -2.27718710E+00     2.29632730E+00              *
+ *      Ei -->  6.75462813E-01     1.81974734E+01              *
+ *      Ee -->  3.82996000E-01     4.70832595E+01              *
+ *      pi -->  8.83886163E-04     9.72001902E-01              *
+ *      pe -->  5.47099136E-04     2.51492717E+00              *
+ *      Ti -->  3.28045583E-02     9.71124733E-01              *
+ *      Te -->  2.04389302E-02     2.51264101E+00              *
+ *     Csi -->  8.34435435E-01     6.59699996E+00              *
+ *       M --> -9.96484913E-01     9.94718046E-01              *
+ *    rhon -->  1.47882426E-04     1.72790337E-02              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.21917354E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0009.h5
+         
+ ***************************************************************
+ *                    Time iteration   =    10                 *
+ ***************************************************************
+ ***** NR iteration:            1 *****
+ NR dumping factor:    0.22766595841043899     
+ n =    11.918918181103942     
+ nn =    9.4763967940276569E-002
+ total n =    12.013682149044218     
+ pump =    1.7192902301844710E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    4.8704049595295403E+022
+ plasma diffusion flux =    3.7308835482019817E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    4.9071382022970055E+022
+ numerical flux =    3.4373847701120543E+018
+ net flux =   -3.3870268795492866E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0001.h5
+         
+ Error:                    0.35209338663669826     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            2 *****
+ NR dumping factor:    0.25118345337946790     
+ n =    11.919368786843242     
+ nn =    9.4478604171697358E-002
+ total n =    12.013847391014940     
+ pump =    1.6850809517213238E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    4.8285398831829940E+022
+ plasma diffusion flux =    5.6850401419895584E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    4.8705004909525318E+022
+ numerical flux =    3.4327986378586506E+018
+ net flux =   -5.8636237420820116E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0002.h5
+         
+ Error:                    0.27317627888297502     
+ ir_check:            0
+ *********************************
+  
+  
+ ***** NR iteration:            3 *****
+ NR dumping factor:    0.27803450029727639     
+ n =    11.919669796676480     
+ nn =    9.4235716153643900E-002
+ total n =    12.013905512830124     
+ pump =    1.6561827798963679E+018
+ puff =    3.9999999999999980E+020
+ plasma parallel flux =    4.7927552488591948E+022
+ plasma diffusion flux =    4.2441840204003941E+020
+ plasma pinch flux =    0.0000000000000000     
+ neutral flux =    4.8338162024343939E+022
+ numerical flux =    3.4412131919961436E+018
+ net flux =   -4.3324290737993522E+020
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_NR0003.h5
+         
+ Error:                    0.20535224971995258     
+ Solution saved as last checkpoint.
+ ir_check:            0
+ *********************************
+  
+  
+ * ------------------------------------------------------------*
+ * Time (adimensional) =  0.10000E+04                            *
+ * Dt (adimensional)        =  0.10000E+03                            *
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^               *
+ * __________      Minimum            Maximum                  *
+ *     rho -->  2.35476225E-02     1.00086369E+00              *
+ *       u --> -2.27736405E+00     2.29406109E+00              *
+ *      Ei -->  6.70686970E-01     1.82136362E+01              *
+ *      Ee -->  3.58665720E-01     4.90657263E+01              *
+ *      pi -->  8.42400383E-04     9.72802687E-01              *
+ *      pe -->  5.10516526E-04     2.62063379E+00              *
+ *      Ti -->  3.26203955E-02     9.71987276E-01              *
+ *      Te -->  1.91405227E-02     2.61843715E+00              *
+ *     Csi -->  8.28486938E-01     6.69723139E+00              *
+ *       M --> -9.97105412E-01     9.95858184E-01              *
+ *    rhon -->  1.47407192E-04     1.64023046E-02              *
+ * ------------------------------------------------------------*
+ * Time residual  =    0.20586867E-02
+   
+   
+   
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08_0010.h5
+         
+ Output written to file /home/obrun/MHDG_data/WEST/Solutions/time_init/flux_limited/Sol2D_WEST_57929_11_2k_P8_DPe0.200E+02_DPai0.314E+06_DPae0.105E+08.h5
+         
+Elapsed cpu-time =   4865.354 seconds.
+Elapsed run-time =   1311.296 seconds.
+  
+  
+  
+ *********************************************************************************************
+ *                                    CODE TIMING ( Nthreads =  4)                           *
+ *                            Cpu-time  (% tot)      Run-time  (% tot)   Speedup/Nthreads    *
+ *  Precal. matr     :        1.466E+02 ( 3.0%)      2.108E+01 ( 1.7%)         1.7           *
+ *  Jacobian         :        1.988E+03 (41.2%)      5.611E+02 (44.1%)         0.9           *
+ *  Mapping          :        2.053E+03 (42.5%)      3.168E+02 (24.9%)         1.6           *
+ *  Boundary cond.   :        3.898E+00 ( 0.1%)      2.950E+00 ( 0.2%)         0.3           *
+ *  Assembly         :        1.282E+02 ( 2.7%)      3.565E+01 ( 2.8%)         0.9           *
+ *  Solve glob. syst.:        4.944E+02 (10.2%)      3.300E+02 (26.0%)         0.4           *
+ *  Element solution :        1.150E+01 ( 0.2%)      3.723E+00 ( 0.3%)         0.8           *
+ *  Total time       :        4.826E+03 (100.0%)     1.271E+03 (100.0%)        0.9           *
+ *********************************************************************************************
+  
+  
+  
+ *********************************************************************************************
+ *                        LINEAR SYSTEM SOLVER TIMING: PASTIX ( Nthreads =  4)               *
+ *                            Cpu-time  (% tot)      Run-time  (% tot)   Speedup/Nthreads    *
+ *  Init. mat        :        1.567E-01 ( 0.0%)      1.380E-01 ( 0.0%)         0.3           *
+ *  Check mat        :        1.700E+02 (34.4%)      1.701E+02 (51.6%)         0.2           *
+ *  Anal. mat        :        3.168E+01 ( 6.4%)      2.839E+01 ( 8.6%)         0.3           *
+ *  Build mat        :        4.471E+00 ( 0.9%)      3.719E+00 ( 1.1%)         0.3           *
+ *  LU decomp.       :        2.674E+02 (54.2%)      1.215E+02 (36.9%)         0.6           *
+ *  Solve            :        2.004E+01 ( 4.1%)      5.594E+00 ( 1.7%)         0.9           *
+ *  Total time      :        4.938E+02 (100.0%)     3.294E+02 (100.0%)         0.4           *
+ *********************************************************************************************
+  
+  
+  
