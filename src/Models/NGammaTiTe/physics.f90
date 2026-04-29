@@ -1329,6 +1329,40 @@ CONTAINS
 
 
   END SUBROUTINE compute_flux_limiter
+
+#ifdef NEUTRAL
+  SUBROUTINE apply_neutral_flux_limiter_to_diffusion(q, up, d_iso, deff_prev)
+    REAL*8, INTENT(IN)    :: q(:, :), up(:, :)
+    REAL*8, INTENT(INOUT) :: d_iso(:, :, :)
+    REAL*8, INTENT(INOUT) :: deff_prev(:)
+    REAL*8                :: qpr(simpar%Ndim,simpar%Neq)
+    REAL*8                :: dnn_loc, grad_nn, nn_loc, csi_loc, ratio
+    REAL*8                :: gamma_loc, alpha_loc, omega_loc, deff_calc
+    INTEGER               :: ig
+    REAL*8, PARAMETER     :: nn_min = 1.d-10, csi_min = 1.d-12, param_min = 1.d-12
+
+    gamma_loc = MAX(phys%fluxlim_nn_gamma,param_min)
+    alpha_loc = MAX(phys%fluxlim_nn_alpha,param_min)
+    omega_loc = MIN(1.d0,MAX(0.d0,phys%fluxlim_nn_omega))
+
+    DO ig = 1,SIZE(q,1)
+      qpr = RESHAPE(q(ig,:),(/simpar%Ndim,simpar%Neq/))
+      grad_nn = NORM2(qpr(:,5))
+      dnn_loc = MAX(d_iso(5,5,ig),0.d0)
+      nn_loc = MAX(up(ig,11),nn_min)
+      csi_loc = MAX(up(ig,9),csi_min)
+
+      ratio = (dnn_loc*grad_nn)/(alpha_loc*nn_loc*csi_loc)
+      deff_calc = dnn_loc*(1.d0 + ratio**gamma_loc)**(-1.d0/gamma_loc)
+      IF (deff_prev(ig) > 0.d0) THEN
+        deff_calc = omega_loc*deff_calc + (1.d0-omega_loc)*deff_prev(ig)
+      END IF
+
+      deff_prev(ig) = deff_calc
+      d_iso(5,5,ig) = deff_calc
+    END DO
+  END SUBROUTINE apply_neutral_flux_limiter_to_diffusion
+#endif
    
 
   ! ******************************

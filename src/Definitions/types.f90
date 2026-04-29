@@ -274,6 +274,9 @@ MODULE types
      REAL*8,ALLOCATABLE        :: diff_nn_Vol(:) ! Diffusion in the neutral equation at 2D Gauss points
      REAL*8,ALLOCATABLE        :: diff_nn_Fac(:) ! Diffusion in the neutral equation at 1D Gauss points on interior faces
      REAL*8,ALLOCATABLE        :: diff_nn_Bou(:) ! Diffusion in the neutral equation at 1D Gauss points on boundary faces
+     REAL*8,ALLOCATABLE        :: deff_nn_prev_Vol(:) ! Previous relaxed neutral effective diffusion at 2D Gauss points
+     REAL*8,ALLOCATABLE        :: deff_nn_prev_Fac(:) ! Previous relaxed neutral effective diffusion on interior faces
+     REAL*8,ALLOCATABLE        :: deff_nn_prev_Bou(:) ! Previous relaxed neutral effective diffusion on boundary faces
      REAL*8,ALLOCATABLE        :: v_nn_Vol(:,:) ! Convective velocity in the neutral equation at 2D Gauss points
      REAL*8,ALLOCATABLE        :: v_nn_Fac(:,:) ! Convective velocity in the neutral equation at 1D Gauss points on interior faces
      REAL*8,ALLOCATABLE        :: v_nn_Bou(:,:) ! Convective velocity in the neutral equation at 1D Gauss points on boundary faces
@@ -311,6 +314,9 @@ MODULE types
      REAL*8                    :: c_fle ! Fraction of the free streaming flux used in the electron flux limiter
      REAL*8                    :: T_fluxlim_maxi ! Max ion temperature [eV] in old heat flux limiter (limiting T in T^(5/2))
      REAL*8                    :: T_fluxlim_maxe ! Max electron temperature [eV] in old heat flux limiter (limiting T in T^(5/2))
+     REAL*8                    :: fluxlim_nn_gamma ! Transition exponent for neutral effective diffusion limiter
+     REAL*8                    :: fluxlim_nn_alpha ! Free-streaming coefficient for neutral effective diffusion limiter
+     REAL*8                    :: fluxlim_nn_omega ! Under-relaxation for neutral effective diffusion limiter
      ! Diffusion coefficients 1D imported from file
      REAL*8, POINTER           :: rho_1D(:) => NULL() ! Radial coordinate for 1D diffusion profiles
      REAL*8, POINTER           :: diff_n_1D(:) => NULL() ! Perpendicular diffusion in the continuity equation
@@ -430,6 +436,7 @@ MODULE types
      ! 2 -add density blob
      LOGICAL :: logrho   ! solve for the density logarithm instead of density
      LOGICAL :: flux_limiter ! use flux limiter for ion and electron parallel conductive heat fluxes (with provided c_fli,c_fle in physics)
+     LOGICAL :: flux_limiter_neutral ! use neutral free-streaming limiter on Dnn
      LOGICAL :: external_heating ! to read and apply external heating from input file
      LOGICAL :: impurity_radiation ! if to apply cooling factor mimicking impurity radiation, complemented by impurity name and concentration in phys
      LOGICAL :: import_diffusion_1D ! import 1D diffusion profiles from file, complemented by path in inputs

@@ -753,18 +753,53 @@ CONTAINS
       !         CALL set_periodic_bc()
 #ifndef SAVEFLUX
     CASE (bc_Bohm)
+#ifdef NEUTRAL
+      IF (switch%flux_limiter_neutral .AND. switch%testcase .NE. 2) THEN
+        CALL apply_neutral_flux_limiter_to_diffusion(qfg,upg,diff_iso_fac,&
+             phys%deff_nn_prev_Bou((ifa - 1)*refElPol%Ngauss1d + 1:ifa*refElPol%Ngauss1d))
+      END IF
+#endif
       CALL set_Bohm_bc(v_nn_Bou_el,tau_save_el,xy_g_save_el)
     CASE (bc_BohmPump)
-
+#ifdef NEUTRAL
+      IF (switch%flux_limiter_neutral .AND. switch%testcase .NE. 2) THEN
+        CALL apply_neutral_flux_limiter_to_diffusion(qfg,upg,diff_iso_fac,&
+             phys%deff_nn_prev_Bou((ifa - 1)*refElPol%Ngauss1d + 1:ifa*refElPol%Ngauss1d))
+      END IF
+#endif
       CALL set_Bohm_bc(v_nn_Bou_el,tau_save_el,xy_g_save_el)
     CASE (bc_BohmPuff)
+#ifdef NEUTRAL
+      IF (switch%flux_limiter_neutral .AND. switch%testcase .NE. 2) THEN
+        CALL apply_neutral_flux_limiter_to_diffusion(qfg,upg,diff_iso_fac,&
+             phys%deff_nn_prev_Bou((ifa - 1)*refElPol%Ngauss1d + 1:ifa*refElPol%Ngauss1d))
+      END IF
+#endif
       CALL set_Bohm_bc(v_nn_Bou_el,tau_save_el,xy_g_save_el)
 #else
     CASE (bc_Bohm)
+#ifdef NEUTRAL
+      IF (switch%flux_limiter_neutral .AND. switch%testcase .NE. 2) THEN
+        CALL apply_neutral_flux_limiter_to_diffusion(qfg,upg,diff_iso_fac,&
+             phys%deff_nn_prev_Bou((ifa - 1)*refElPol%Ngauss1d + 1:ifa*refElPol%Ngauss1d))
+      END IF
+#endif
       CALL set_Bohm_bc(v_nn_Bou_el,tau_save_el,xy_g_save_el,faceflux_pump,faceflux_puff,faceflux_parallel,faceflux_perpendicular,faceflux_pinch,faceflux_neutral,faceflux_numerical)
     CASE (bc_BohmPump)
+#ifdef NEUTRAL
+      IF (switch%flux_limiter_neutral .AND. switch%testcase .NE. 2) THEN
+        CALL apply_neutral_flux_limiter_to_diffusion(qfg,upg,diff_iso_fac,&
+             phys%deff_nn_prev_Bou((ifa - 1)*refElPol%Ngauss1d + 1:ifa*refElPol%Ngauss1d))
+      END IF
+#endif
       CALL set_Bohm_bc(v_nn_Bou_el,tau_save_el,xy_g_save_el,faceflux_pump,faceflux_puff,faceflux_parallel,faceflux_perpendicular,faceflux_pinch,faceflux_neutral,faceflux_numerical)
     CASE (bc_BohmPuff)
+#ifdef NEUTRAL
+      IF (switch%flux_limiter_neutral .AND. switch%testcase .NE. 2) THEN
+        CALL apply_neutral_flux_limiter_to_diffusion(qfg,upg,diff_iso_fac,&
+             phys%deff_nn_prev_Bou((ifa - 1)*refElPol%Ngauss1d + 1:ifa*refElPol%Ngauss1d))
+      END IF
+#endif
       CALL set_Bohm_bc(v_nn_Bou_el,tau_save_el,xy_g_save_el,faceflux_pump,faceflux_puff,faceflux_parallel,faceflux_perpendicular,faceflux_pinch,faceflux_neutral,faceflux_numerical)
 #endif
     CASE (bc_iter_core)

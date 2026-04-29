@@ -1456,6 +1456,13 @@ CONTAINS
       CALL transport_model_1d%apply_1D_diffusion(rho_pol_norm,diff_iso_vol,diff_ani_vol)
     ENDIF
 
+#ifdef NEUTRAL
+    IF (switch%flux_limiter_neutral) THEN
+      CALL cons2phys(ueg,upg)
+      CALL apply_neutral_flux_limiter_to_diffusion(qeg,upg,diff_iso_vol,&
+           phys%deff_nn_prev_Vol((iel - 1)*Ng2d + 1:iel*Ng2d))
+    END IF
+#endif
 
     if (save_tau) then
        diff_nn_Vol_el = diff_iso_vol(5,5,:)
@@ -1812,6 +1819,15 @@ CONTAINS
     IF (switch%transport_1d) THEN
       CALL transport_model_1d%apply_1D_diffusion(rho_pol_norm,diff_iso_fac,diff_ani_fac)
     ENDIF
+
+#ifdef NEUTRAL
+    IF (switch%flux_limiter_neutral) THEN
+      CALL cons2phys(ufg,upgf)
+      CALL apply_neutral_flux_limiter_to_diffusion(qfg,upgf,diff_iso_fac,&
+           phys%deff_nn_prev_Fac(((iel - 1)*refElPol%Nfaces + ifa - 1)*NGauss + 1:&
+                                 ((iel - 1)*refElPol%Nfaces + ifa)*NGauss))
+    END IF
+#endif
     if (save_tau) then
        indsave = (ifa - 1)*Ngauss + (/(i,i=1,Ngauss)/)
        diff_nn_Fac_el(indsave) = diff_iso_fac(5,5,:)
@@ -1990,6 +2006,15 @@ CONTAINS
     IF (switch%transport_1d) THEN
       CALL transport_model_1d%apply_1D_diffusion(rho_pol_norm,diff_iso_fac,diff_ani_fac)
     ENDIF
+
+#ifdef NEUTRAL
+    IF (switch%flux_limiter_neutral) THEN
+      CALL cons2phys(ufg,upgf)
+      CALL apply_neutral_flux_limiter_to_diffusion(qfg,upgf,diff_iso_fac,&
+           phys%deff_nn_prev_Fac(((iel - 1)*refElPol%Nfaces + ifa - 1)*NGauss + 1:&
+                                 ((iel - 1)*refElPol%Nfaces + ifa)*NGauss))
+    END IF
+#endif
 
     if (save_tau) then
        indsave = (ifa -1)*Ngauss + (/(i,i=1,Ngauss)/)
