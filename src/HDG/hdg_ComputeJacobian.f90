@@ -2605,6 +2605,10 @@ CONTAINS
     integer*4                  :: alpha,beta,ii
 #endif
     integer*4                 :: i,j,k,iord,z,inn,ign,ik
+#ifdef NEUTRALEULER
+    integer*4                 :: ignx, igny
+    real*8,dimension(Neq,Neq) :: Ax_neut, Ay_neut
+#endif
     real*8,dimension(neq,neq) :: A
     real*8,dimension(neq,Ndim):: APinch
     real*8                    :: Qpr(Ndim,Neq),bb(3)
@@ -2645,13 +2649,13 @@ CONTAINS
 #endif
     real*8                    :: niz,nrec,fGammacx,fGammarec
     real*8                    :: dniz_dU(Neq),dnrec_dU(Neq),dfGammacx_dU(Neq),dfGammarec_dU(Neq)
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
     real*8                    :: fGammaN
     real*8                    :: dfGammaN_dU(Neq)
 #endif
 #ifdef TEMPERATURE
         REAL*8                    :: sigmaviz,sigmavrec,sigmavcx,fEiiz,fEirec,fEicx
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
     real*8                    :: fEiN
     real*8                    :: dfEiN_dU(Neq)
 #endif
@@ -2679,6 +2683,57 @@ CONTAINS
     inn = phys%idx_rhon_eq
     ign = phys%idx_gamman_eq
     ik = phys%idx_k_eq
+#ifdef NEUTRALEULER
+    ignx = phys%idx_gammanx_eq
+    igny = phys%idx_gammany_eq
+    
+    block
+      real*8 :: Ti, ui, ni, nn, unx, uny
+      real*8 :: dTi_dU1, dTi_dU2, dTi_dU3
+      real*8 :: tol
+      tol = 1.d-7
+      
+      ni = MAX(ue(1), tol)
+      ui = ue(2)/ni
+      Ti = upe(7)
+      nn = MAX(ue(5), tol)
+      unx = ue(6)/nn
+      uny = ue(7)/nn
+      
+      dTi_dU1 = -Ti/ni + ui**2/(3.d0*phys%Mref*ni)
+      dTi_dU2 = -2.d0*ui/(3.d0*phys%Mref*ni)
+      dTi_dU3 = 2.d0/(3.d0*phys%Mref*ni)
+      
+      Ax_neut = 0.d0
+      Ay_neut = 0.d0
+      
+      ! Eq 5 (neutral mass)
+      Ax_neut(5, 6) = 1.d0
+      Ay_neut(5, 7) = 1.d0
+      
+      ! Eq 6 (neutral x-momentum)
+      Ax_neut(6, 1) = nn * dTi_dU1
+      Ax_neut(6, 2) = nn * dTi_dU2
+      Ax_neut(6, 3) = nn * dTi_dU3
+      Ax_neut(6, 5) = -unx**2 + Ti
+      Ax_neut(6, 6) = 2.d0 * unx
+      
+      Ay_neut(6, 5) = -unx * uny
+      Ay_neut(6, 6) = uny
+      Ay_neut(6, 7) = unx
+      
+      ! Eq 7 (neutral y-momentum)
+      Ax_neut(7, 5) = -unx * uny
+      Ax_neut(7, 6) = uny
+      Ax_neut(7, 7) = unx
+      
+      Ay_neut(7, 1) = nn * dTi_dU1
+      Ay_neut(7, 2) = nn * dTi_dU2
+      Ay_neut(7, 3) = nn * dTi_dU3
+      Ay_neut(7, 5) = -uny**2 + Ti
+      Ay_neut(7, 7) = 2.d0 * uny
+    end block
+#endif
 
     b = b3(1:Ndim)
 
@@ -2882,6 +2937,10 @@ CONTAINS
         CALL compute_dfGammacx_dU(ue,dfGammacx_dU)
         CALL compute_fGammarec(ue,fGammarec)
         CALL compute_dfGammarec_dU(ue,dfGammarec_dU)
+#ifdef NEUTRALEULER
+        CALL compute_fGammaN(ue,b,fGammaN)
+        CALL compute_dfGammaN_dU(ue,b,dfGammaN_dU)
+#endif
 #ifdef NEUTRALGAMMA
         CALL compute_fGammaN(ue,fGammaN)
         CALL compute_dfGammaN_dU(ue,dfGammaN_dU)
@@ -2896,7 +2955,7 @@ CONTAINS
         CALL compute_dfEirec_dU(ue,dfEirec_dU)
         CALL compute_fEicx(ue,fEicx)
         CALL compute_dfEicx_dU(ue,dfEicx_dU)
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
         CALL compute_fEiN(ue,fEiN)
         CALL compute_dfEiN_dU(ue,dfEiN_dU)
 #endif
@@ -2926,7 +2985,13 @@ CONTAINS
     !Assembly the matrix for neutral sources
 #ifdef TEMPERATURE
 IF (switch%impurity_radiation) THEN
-#ifdef NEUTRALGAMMA
+#ifdef NEUTRALEULER
+  call assemblyNeutral(ue,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
+    &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
+    &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,fEiN,dfEiN_dU,Sn,Sn0,b, &
+    sigmavEiz=sigmavEiz,dsigmavEiz_dU=dsigmavEiz_dU,sigmavErec=sigmavErec,dsigmavErec_dU=dsigmavErec_dU,&
+    cooling_factor=cooling_factor,dcooling_factor_dU=dcooling_factor_dU)
+#elif defined(NEUTRALGAMMA)
   call assemblyNeutral(ue,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
     &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
     &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,fEiN,dfEiN_dU,Sn,Sn0, &
@@ -2940,7 +3005,12 @@ IF (switch%impurity_radiation) THEN
     cooling_factor=cooling_factor,dcooling_factor_dU=dcooling_factor_dU)
 #endif
 ELSE
-#ifdef NEUTRALGAMMA
+#ifdef NEUTRALEULER
+  call assemblyNeutral(ue,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
+    &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
+    &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,fEiN,dfEiN_dU,Sn,Sn0,b, &
+    sigmavEiz=sigmavEiz,dsigmavEiz_dU=dsigmavEiz_dU,sigmavErec=sigmavErec,dsigmavErec_dU=dsigmavErec_dU)
+#elif defined(NEUTRALGAMMA)
   call assemblyNeutral(ue,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
     &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
     &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,fEiN,dfEiN_dU,Sn,Sn0, &
@@ -2953,7 +3023,9 @@ ELSE
 #endif
 ENDIF
 #else
-#ifdef NEUTRALGAMMA
+#ifdef NEUTRALEULER
+        CALL assemblyNeutral(ue,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,Sn,Sn0,b)
+#elif defined(NEUTRALGAMMA)
         CALL assemblyNeutral(ue,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,Sn,Sn0)
 #else
         CALL assemblyNeutral(ue,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,Sn,Sn0)
@@ -3147,7 +3219,15 @@ ENDIF
 	! Convection contribution
         DO j = 1,Neq
            z = i+(j-1)*Neq
-           Auu(:,:,z)= Auu(:,:,z) - A(i,j)*NNxy
+#ifdef NEUTRALEULER
+           if (i >= 5 .and. i <= 7) then
+             Auu(:,:,z) = Auu(:,:,z) - (Ax_neut(i,j)*NxyzNi(:,:,1) + Ay_neut(i,j)*NxyzNi(:,:,2))
+           else
+             Auu(:,:,z) = Auu(:,:,z) - A(i,j)*NNxy
+           end if
+#else
+           Auu(:,:,z) = Auu(:,:,z) - A(i,j)*NNxy
+#endif
 #ifdef NEUTRAL
           !Sources
           Auu(:,:,z) = Auu(:,:,z) + Sn(i,j)*NNi
@@ -3367,6 +3447,10 @@ ENDIF
       integer*4                  :: alpha,beta,ii
 #endif
       integer*4                  :: i,j,k,inn,ign,ik
+#ifdef NEUTRALEULER
+      integer*4                  :: ignx, igny
+      real*8,dimension(Neq,Neq)  :: Ax_neut, Ay_neut
+#endif
       integer*4,dimension(size(ind_asf))  :: ind_if,ind_jf,ind_kf
       real*8,dimension(neq,neq) :: A
       real*8,dimension(neq,Ndim):: APinch
@@ -3408,6 +3492,57 @@ ENDIF
       inn = phys%idx_rhon_eq
       ign = phys%idx_gamman_eq
       ik = phys%idx_k_eq
+#ifdef NEUTRALEULER
+      ignx = phys%idx_gammanx_eq
+      igny = phys%idx_gammany_eq
+      
+      block
+        real*8 :: Ti, ui, ni, nn, unx, uny
+        real*8 :: dTi_dU1, dTi_dU2, dTi_dU3
+        real*8 :: tol
+        tol = 1.d-7
+        
+        ni = MAX(uf(1), tol)
+        ui = uf(2)/ni
+        Ti = (2.d0/(3.d0*phys%Mref)) * (uf(3) - 0.5d0 * uf(2)**2 / ni) / ni
+        nn = MAX(uf(5), tol)
+        unx = uf(6)/nn
+        uny = uf(7)/nn
+        
+        dTi_dU1 = -Ti/ni + ui**2/(3.d0*phys%Mref*ni)
+        dTi_dU2 = -2.d0*ui/(3.d0*phys%Mref*ni)
+        dTi_dU3 = 2.d0/(3.d0*phys%Mref*ni)
+        
+        Ax_neut = 0.d0
+        Ay_neut = 0.d0
+        
+        ! Eq 5 (neutral mass)
+        Ax_neut(5, 6) = 1.d0
+        Ay_neut(5, 7) = 1.d0
+        
+        ! Eq 6 (neutral x-momentum)
+        Ax_neut(6, 1) = nn * dTi_dU1
+        Ax_neut(6, 2) = nn * dTi_dU2
+        Ax_neut(6, 3) = nn * dTi_dU3
+        Ax_neut(6, 5) = -unx**2 + Ti
+        Ax_neut(6, 6) = 2.d0 * unx
+        
+        Ay_neut(6, 5) = -unx * uny
+        Ay_neut(6, 6) = uny
+        Ay_neut(6, 7) = unx
+        
+        ! Eq 7 (neutral y-momentum)
+        Ax_neut(7, 5) = -unx * uny
+        Ax_neut(7, 6) = uny
+        Ax_neut(7, 7) = unx
+        
+        Ay_neut(7, 1) = nn * dTi_dU1
+        Ay_neut(7, 2) = nn * dTi_dU2
+        Ay_neut(7, 3) = nn * dTi_dU3
+        Ay_neut(7, 5) = -uny**2 + Ti
+        Ay_neut(7, 7) = 2.d0 * uny
+      end block
+#endif
 
       b = b3(1:Ndim)
       bb = b3
@@ -3654,7 +3789,15 @@ ENDIF
         ! Convection contribution
         DO j = 1,Neq
           ind_jf = ind_asf + j
+#ifdef NEUTRALEULER
+          if (i >= 5 .and. i <= 7) then
+            kmult = (Ax_neut(i,j)*n(1) + Ay_neut(i,j)*n(2))*NNif
+          else
+            kmult = bn*A(i,j)*NNif
+          end if
+#else
           kmult = bn*A(i,j)*NNif
+#endif
           elMat%Aul(ind_fe(ind_if),ind_ff(ind_jf),iel) = elMat%Aul(ind_fe(ind_if),ind_ff(ind_jf),iel) + kmult
                  elMat%ALL(ind_ff(ind_if),ind_ff(ind_jf),iel) = elMat%ALL(ind_ff(ind_if),ind_ff(ind_jf),iel) + kmult
 !#ifdef TEMPERATURE
@@ -3858,6 +4001,10 @@ ENDIF
       real*8                    :: exb(3),kcoeff
 #endif
       integer*4                 :: i,j,k,inn,ign,ik
+#ifdef NEUTRALEULER
+      integer*4                 :: ignx, igny
+      real*8,dimension(Neq,Neq)  :: Ax_neut, Ay_neut
+#endif
       integer*4,dimension(Npfl)  :: ind_if,ind_jf,ind_kf
       real*8,dimension(neq,neq) :: A
       real*8,dimension(neq,Ndim):: APinch
@@ -3899,6 +4046,57 @@ ENDIF
       inn = phys%idx_rhon_eq
       ign = phys%idx_gamman_eq
       ik = phys%idx_k_eq
+#ifdef NEUTRALEULER
+      ignx = phys%idx_gammanx_eq
+      igny = phys%idx_gammany_eq
+      
+      block
+        real*8 :: Ti, ui, ni, nn, unx, uny
+        real*8 :: dTi_dU1, dTi_dU2, dTi_dU3
+        real*8 :: tol
+        tol = 1.d-7
+        
+        ni = MAX(uf(1), tol)
+        ui = uf(2)/ni
+        Ti = (2.d0/(3.d0*phys%Mref)) * (uf(3) - 0.5d0 * uf(2)**2 / ni) / ni
+        nn = MAX(uf(5), tol)
+        unx = uf(6)/nn
+        uny = uf(7)/nn
+        
+        dTi_dU1 = -Ti/ni + ui**2/(3.d0*phys%Mref*ni)
+        dTi_dU2 = -2.d0*ui/(3.d0*phys%Mref*ni)
+        dTi_dU3 = 2.d0/(3.d0*phys%Mref*ni)
+        
+        Ax_neut = 0.d0
+        Ay_neut = 0.d0
+        
+        ! Eq 5 (neutral mass)
+        Ax_neut(5, 6) = 1.d0
+        Ay_neut(5, 7) = 1.d0
+        
+        ! Eq 6 (neutral x-momentum)
+        Ax_neut(6, 1) = nn * dTi_dU1
+        Ax_neut(6, 2) = nn * dTi_dU2
+        Ax_neut(6, 3) = nn * dTi_dU3
+        Ax_neut(6, 5) = -unx**2 + Ti
+        Ax_neut(6, 6) = 2.d0 * unx
+        
+        Ay_neut(6, 5) = -unx * uny
+        Ay_neut(6, 6) = uny
+        Ay_neut(6, 7) = unx
+        
+        ! Eq 7 (neutral y-momentum)
+        Ax_neut(7, 5) = -unx * uny
+        Ax_neut(7, 6) = uny
+        Ax_neut(7, 7) = unx
+        
+        Ay_neut(7, 1) = nn * dTi_dU1
+        Ay_neut(7, 2) = nn * dTi_dU2
+        Ay_neut(7, 3) = nn * dTi_dU3
+        Ay_neut(7, 5) = -uny**2 + Ti
+        Ay_neut(7, 7) = 2.d0 * uny
+      end block
+#endif
 
       b = b3(1:Ndim)
       bb = b3
@@ -4149,7 +4347,15 @@ END IF
               IF (.NOT. isdir) THEN
           DO j = 1,Neq
             ind_jf = ind_asf + j
+#ifdef NEUTRALEULER
+            if (i >= 5 .and. i <= 7) then
+              kmult = (Ax_neut(i,j)*n(1) + Ay_neut(i,j)*n(2))*NNif
+            else
+              kmult = bn*A(i,j)*NNif
+            end if
+#else
             kmult = bn*A(i,j)*NNif
+#endif
             elMat%Aul(ind_fe(ind_if),ind_ff(ind_jf),iel) = elMat%Aul(ind_fe(ind_if),ind_ff(ind_jf),iel) + kmult
 !#ifdef TEMPERATURE
 !#ifdef NEUTRAL
@@ -4344,7 +4550,12 @@ END IF
   !
   !********************************************************************
 #ifdef TEMPERATURE
-#ifdef NEUTRALGAMMA
+#ifdef NEUTRALEULER
+  SUBROUTINE assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
+      &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
+      &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,fEiN,dfEiN_dU,Sn,Sn0,b,&
+      sigmavEiz,dsigmavEiz_dU,sigmavErec,dsigmavErec_dU,cooling_factor,dcooling_factor_dU)
+#elif defined(NEUTRALGAMMA)
   SUBROUTINE assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
       &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
       &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,fEiN,dfEiN_dU,Sn,Sn0,&
@@ -4356,7 +4567,9 @@ END IF
       sigmavEiz,dsigmavEiz_dU,sigmavErec,dsigmavErec_dU,cooling_factor,dcooling_factor_dU)
 #endif
 #else
-#ifdef NEUTRALGAMMA
+#ifdef NEUTRALEULER
+    SUBROUTINE assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,Sn,Sn0,b)
+#elif defined(NEUTRALGAMMA)
     SUBROUTINE assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,Sn,Sn0)
 #else
     SUBROUTINE assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,Sn,Sn0)
@@ -4364,9 +4577,12 @@ END IF
 #endif
              REAL*8, INTENT(IN) :: niz,nrec,fGammacx,fGammarec
              REAL*8, INTENT(IN) :: U(:),dniz_dU(:),dnrec_dU(:),dfGammacx_dU(:),dfGammarec_dU(:)
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
              REAL*8, INTENT(IN) :: fGammaN
              REAL*8, INTENT(IN) :: dfGammaN_dU(:)
+#endif
+#ifdef NEUTRALEULER
+             REAL*8, INTENT(IN) :: b(:)
 #endif
 #ifndef TEMPERATURE
              REAL*8             :: sigmaviz,sigmavrec,sigmavcx
@@ -4374,7 +4590,7 @@ END IF
       REAL*8, INTENT(IN)        :: sigmaviz,sigmavrec,sigmavcx,fEiiz,fEirec,fEicx      
       REAL*8, INTENT(IN)        :: dsigmaviz_dU(:),dsigmavrec_dU(:),dsigmavcx_dU(:)
       REAL*8, INTENT(IN)        :: dfEiiz_dU(:),dfEirec_dU(:),dfEicx_dU(:)
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
       REAL*8, INTENT(IN)        :: fEiN
       REAL*8, INTENT(IN)        :: dfEiN_dU(:)
 #endif
@@ -4386,12 +4602,19 @@ END IF
              REAL*8             :: recombination_energy
 #endif
              INTEGER*4          :: ign, inn
+#ifdef NEUTRALEULER
+             INTEGER*4          :: ignx, igny
+#endif
 
       Sn   = 0.
       Sn0  = 0.
       RE   = 0.
       inn  = phys%idx_rhon_eq
       ign  = phys%idx_gamman_eq
+#ifdef NEUTRALEULER
+      ignx = phys%idx_gammanx_eq
+      igny = phys%idx_gammany_eq
+#endif
 #ifdef TEMPERATURE
       recombination_energy = neutral_rt%recombination_energy
 #endif
@@ -4412,12 +4635,12 @@ END IF
       !Assembly Source Terms in plasma momentum equation
 
       Sn(2,:) = dfGammacx_dU(:)*sigmavcx + dfGammarec_dU(:)*sigmavrec
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
       Sn(2,:) = Sn(2,:) - (dfGammaN_dU(:)*sigmaviz + dfGammaN_dU(:)*sigmavcx)
 #endif
 #ifdef TEMPERATURE
       Sn(2,:)   = Sn(2,:) + fGammacx*dsigmavcx_dU(:) + fGammarec*dsigmavrec_dU(:)
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
       Sn(2,:)   = Sn(2,:) - (fGammaN*dsigmaviz_dU(:) + fGammaN*dsigmavcx_dU(:))
 #endif
 
@@ -4425,7 +4648,7 @@ END IF
 
       Sn(3,:) = -RE*dfEiiz_dU(:)*sigmaviz + dfEirec_dU(:)*sigmavrec + dfEicx_dU(:)*sigmavcx
       Sn(3,:) = Sn(3,:) - RE*fEiiz*dsigmaviz_dU(:) + fEirec*dsigmavrec_dU(:) + fEicx*dsigmavcx_dU(:)
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
       Sn(3,:) = Sn(3,:) - (dfEiN_dU(:)*sigmaviz + dfEiN_dU(:)*sigmavcx + &
            &fEiN*dsigmaviz_dU(:) + fEiN*dsigmavcx_dU(:))
 #endif
@@ -4445,27 +4668,47 @@ END IF
 #ifdef NEUTRALGAMMA
       Sn(ign,:) = -Sn(2,:)
 #endif
+#ifdef NEUTRALEULER
+      Sn(ignx, :) = (dfGammacx_dU(:)*sigmavcx + dfGammarec_dU(:)*sigmavrec)*b(1)
+      Sn(igny, :) = (dfGammacx_dU(:)*sigmavcx + dfGammarec_dU(:)*sigmavrec)*b(2)
+#ifdef TEMPERATURE
+      Sn(ignx, :) = Sn(ignx, :) + (fGammacx*dsigmavcx_dU(:) + fGammarec*dsigmavrec_dU(:))*b(1)
+      Sn(igny, :) = Sn(igny, :) + (fGammacx*dsigmavcx_dU(:) + fGammarec*dsigmavrec_dU(:))*b(2)
+#endif
+      block
+        real*8 :: loss_rate, dloss_rate_dU(size(U))
+        loss_rate = U(1)*(sigmaviz + sigmavcx)
+        dloss_rate_dU = U(1)*(dsigmaviz_dU + dsigmavcx_dU)
+        dloss_rate_dU(1) = dloss_rate_dU(1) + (sigmaviz + sigmavcx)
+        
+        Sn(ignx, :) = Sn(ignx, :) - dloss_rate_dU(:)*U(ignx)
+        Sn(ignx, ignx) = Sn(ignx, ignx) - loss_rate
+        
+        Sn(igny, :) = Sn(igny, :) - dloss_rate_dU(:)*U(igny)
+        Sn(igny, igny) = Sn(igny, igny) - loss_rate
+      end block
+#endif
 
       !Assembly RHS Neutral Source Terms
       Sn0(1)    = niz*sigmaviz - nrec*sigmavrec
       Sn0(2)    = -fGammacx*sigmavcx - fGammarec*sigmavrec
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
       Sn0(2)    = Sn0(2) + fGammaN*sigmaviz + fGammaN*sigmavcx
 #endif
 #ifdef TEMPERATURE
       Sn0(1)    = Sn0(1) + niz*dot_PRODUCT(dsigmaviz_dU,U) - nrec*dot_PRODUCT(dsigmavrec_dU,U)
       Sn0(2)    = Sn0(2) - fGammarec*dot_PRODUCT(dsigmavrec_dU,U)
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
       Sn0(2)    = Sn0(2) + fGammaN*dot_PRODUCT(dsigmaviz_dU,U)
 #endif
       Sn0(3)    = RE*fEiiz*sigmaviz - fEirec*sigmavrec - fEicx*sigmavcx
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
       Sn0(3)    = Sn0(3) + fEiN*sigmaviz + fEiN*sigmavcx
 #endif
       Sn0(4)    = nrec*sigmavrec*recombination_energy
       Sn0(4)    = Sn0(4) - niz*sigmavEiz - nrec*sigmavErec
       Sn0(3)    = Sn0(3) + RE*fEiiz*dot_PRODUCT(dsigmaviz_dU,U) - fEirec*dot_PRODUCT(dsigmavrec_dU,U)
-#ifdef NEUTRALGAMMA
+#if defined(NEUTRALGAMMA) || defined(NEUTRALEULER)
       Sn0(3)    = Sn0(3) + fEiN*dot_PRODUCT(dsigmaviz_dU,U)
 #endif
       Sn0(4)    = Sn0(4) - niz*dot_product(dsigmavEiz_dU,U) - nrec*dot_product(dsigmavErec_dU,U)
@@ -4477,6 +4720,23 @@ END IF
       Sn0(inn)  = -Sn0(1)
 #ifdef NEUTRALGAMMA
       Sn0(ign)  = -Sn0(2)
+#endif
+#ifdef NEUTRALEULER
+      Sn0(ignx) = (fGammacx*sigmavcx + fGammarec*sigmavrec)*b(1)
+      Sn0(igny) = (fGammacx*sigmavcx + fGammarec*sigmavrec)*b(2)
+#ifdef TEMPERATURE
+      Sn0(ignx) = Sn0(ignx) + fGammarec*dot_PRODUCT(dsigmavrec_dU,U)*b(1)
+      Sn0(igny) = Sn0(igny) + fGammarec*dot_PRODUCT(dsigmavrec_dU,U)*b(2)
+#endif
+      block
+        real*8 :: loss_rate, dloss_rate_dU(size(U))
+        loss_rate = U(1)*(sigmaviz + sigmavcx)
+        dloss_rate_dU = U(1)*(dsigmaviz_dU + dsigmavcx_dU)
+        dloss_rate_dU(1) = dloss_rate_dU(1) + (sigmaviz + sigmavcx)
+        
+        Sn0(ignx) = Sn0(ignx) - loss_rate * U(ignx) + U(ignx)*dot_PRODUCT(dloss_rate_dU, U)
+        Sn0(igny) = Sn0(igny) - loss_rate * U(igny) + U(igny)*dot_PRODUCT(dloss_rate_dU, U)
+      end block
 #endif
 
     ENDSUBROUTINE assemblyNeutral

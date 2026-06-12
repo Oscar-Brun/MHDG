@@ -68,6 +68,7 @@
 /
 
 &INPUT_LST
+    transport_model_path = 'transport_model.nml'
     field_path          = 'path/to/magnetic/field.h5'  ! Path to Bfield h5 file. 
                                                                         ! If switch%ME = .true. then omit numbering part like 'B_field/WEST_54487'
                                                                         ! If switch%ME = .false. then put the full part 'B_field/WEST_54487_0000.h5'
@@ -96,7 +97,7 @@
     impurity_concentration_dimension = 10000
     zeff_path = '/path/where/to/read/zeff/'
     zeff_dimension = 10000
-    diffusion_1D_path = '/path/where/to/read/1d/diffsion/
+    diffusion_1D_path = '/path/where/to/read/1d/diffsion/'
 /
 
 &NUMER_LST
@@ -154,7 +155,7 @@
     osc_adapt		= .true.	! Refine if oscillations are higher than threshold
     osc_tol		= -2.8		! Refine if oscillations are higher than this threshold, only if osc_adapt = .true.
     osc_check		= -3.		! Save the solution as checkpoint if the maximum value of oscillations are lower than this threshold (-100 for no oscillations at all)
-    geometry_path	= '/path/to/geo/file/from/gmesh/geometry.geo
+    geometry_path	= '/path/to/geo/file/from/gmesh/geometry.geo'
 /
 
 &GEOM_LST

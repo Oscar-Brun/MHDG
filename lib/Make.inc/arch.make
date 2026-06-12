@@ -9,8 +9,8 @@ SDIR=$(PWD)/../src/
 COMPTYPE_OPT = opt
 COMPTYPE_DEB = deb
 COMPTYPE_PRO = pro
-COMPTYPE = $(COMPTYPE_OPT)
-#COMPTYPE = $(COMPTYPE_DEB)
+#COMPTYPE = $(COMPTYPE_OPT)
+COMPTYPE = $(COMPTYPE_DEB)
 #COMPTYPE = $(COMPTYPE_PRO)
 
 #-------------------------------------------------------------------------------
@@ -18,8 +18,8 @@ COMPTYPE = $(COMPTYPE_OPT)
 #-------------------------------------------------------------------------------
 MODE_SERIAL = serial
 MODE_PARALL = parall
-#MODE = $(MODE_SERIAL)
-MODE = $(MODE_PARALL)
+MODE = $(MODE_SERIAL)
+#MODE = $(MODE_PARALL)
 
 #-------------------------------------------------------------------------------
 # The compiler
@@ -37,6 +37,8 @@ MDL_NGAMMATITENEUTRAL=NGammaTiTeNeutral
 MDL_NGAMMATITENEUTRALK=NGammaTiTeNeutralk
 MDL_NGAMMATITENEUTRALGAMMA=NGammaTiTeNeutralGamma
 MDL_NGAMMATITENEUTRALGAMMAK=NGammaTiTeNeutralGammak
+MDL_NGAMMATITENEUTRALEULER=NGammaTiTeNeutralEuler
+MDL_NGAMMATITENEUTRALEULERK=NGammaTiTeNeutralEulerk
 MDL_NGAMMAVORT=NGammaVort
 # Model chosen
 #MDL=$(MDL_NGAMMA)
@@ -44,8 +46,10 @@ MDL_NGAMMAVORT=NGammaVort
 #MDL=$(MDL_NGAMMATITE)
 #MDL=$(MDL_NGAMMATITENEUTRALK)
 #MDL=$(MDL_NGAMMATITENEUTRAL)
-MDL=$(MDL_NGAMMATITENEUTRALGAMMA)
+#MDL=$(MDL_NGAMMATITENEUTRALGAMMA)
 #MDL=$(MDL_NGAMMATITENEUTRALGAMMAK)
+MDL=$(MDL_NGAMMATITENEUTRALEULER)
+#MDL=$(MDL_NGAMMATITENEUTRALEULERK)
 #MDL=$(MDL_NGAMMAVORT)
 #MDL=$(MDL_LAPLACE)
 
@@ -147,6 +151,32 @@ else ifeq ($(MDL),$(MDL_NGAMMATITENEUTRALGAMMAK))
  MACROS+= -DNEUTRALGAMMA
  MACROS+= -DAMJUELSPLINES
  MACROS+= -DTHREEBODYREC
+ MACROS+= -DEXPANDEDCX
+ MACROS+= -DTHERMALCX
+ MACROS+= -DKEQUATION
+ ADDMOD+=hdg_LimitingTechniques.o
+else ifeq ($(MDL),$(MDL_NGAMMATITENEUTRALEULER))
+ RMDL=NGammaTiTeNeutralEuler
+ MACROS+= -DNGAMMA
+ MACROS+= -DTEMPERATURE
+ MACROS+= -DNEUTRAL
+ MACROS+= -DNEUTRALEULER
+ MACROS+= -DAMJUELSPLINES
+ MACROS+= -DTHREEBODYREC
+ MACROS+= -DSAVEFLUX
+ MACROS+= -DEXPANDEDCX
+ MACROS+= -DTHERMALCX
+ MACROS+= -DNEUTRALPNEW
+ ADDMOD+=hdg_LimitingTechniques.o
+else ifeq ($(MDL),$(MDL_NGAMMATITENEUTRALEULERK))
+ RMDL=NGammaTiTeNeutralEuler
+ MACROS+= -DNGAMMA
+ MACROS+= -DTEMPERATURE
+ MACROS+= -DNEUTRAL
+ MACROS+= -DNEUTRALEULER
+ MACROS+= -DAMJUELSPLINES
+ MACROS+= -DTHREEBODYREC
+ MACROS+= -DSAVEFLUX
  MACROS+= -DEXPANDEDCX
  MACROS+= -DTHERMALCX
  MACROS+= -DKEQUATION
@@ -297,8 +327,9 @@ ifeq ($(PASTIX),$(LIB_YES))
  #LIB += -L$(HOME)/libs/scotch_6.0.4/lib/ -lscotch -lscotcherrexit  -lptscotchparmetis -lptscotch -lpthread -lhwloc
  #LIB += -L$(MHDG_PASTIX_DIR)/install -lpastix -lm -lrt -lifcore
  #New GNU
- LIB += -L$(MHDG_SCOTCH_DIR)/lib -lptscotch -lscotch -lptscotcherr -lz -lm -lrt -lpthread -lhwloc
  LIB += $(shell echo `PKG_CONFIG_PATH=${PKG_CONFIG_PATH} pkg-config --libs pastix pastixf`)
+ LIB += -L$(MHDG_SCOTCH_DIR)/lib -lptscotch -lscotch -lptscotcherr -lz -lm -lrt -lpthread -lhwloc
+ LIB += -lopenblas
  #New INTEL
  #LIB += -L$(MHDG_SCOTCH_DIR)/lib -lptscotch -lscotch -lptscotcherr -lz -lm -lrt -lpthread
  #LIB += -L$(MHDG_PASTIX_DIR)/install -lpastix -lm -lrt -lifcore -lpthread -lhwloc -lptscotch -lscotch -lscotcherr
@@ -306,7 +337,7 @@ endif
 
 # BLAS/LAPACK
 #Local
-LIB += -L/usr/lib/x86_64-linux-gnu -lblas -llapack -llapacke
+LIB += -L/usr/lib/x86_64-linux-gnu -lopenblas -lblas -llapack -llapacke
 
 # MKL
 #LIB += -L$(MHDG_MKL_DIR)/build/mkl/latest/lib/intel64 -Wl,-rpath,$(MHDG_MKL_DIR)/build/mkl/latest/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl

@@ -9,7 +9,7 @@
   ! rho_diffusion_model_max - rho_blend_width, then smoothly ramps to zero
   ! over that interval, and is exactly zero for
   ! rho_pol_norm >= rho_diffusion_model_max.
-  rho_diffusion_model_max = 0.99
+  rho_diffusion_model_max = 0.95
 
   ! Mixed Bohm / gyro-Bohm coefficients.
   ! Reference: JETTO/NTCC mixed Bohm / gyro-Bohm model description.
@@ -35,7 +35,7 @@
   ! Pinch coefficient C. Positive C follows the outward radial convention.
   ! Use negative C for inward pinch.
   ! A single C is currently used for both model 1 and model 2.
-  c_pinch = 0.5
+  c_pinch = -0.5
 
   ! Collisionality threshold used only by the Militello suppression factor.
   nu_th = 0.04
@@ -51,7 +51,7 @@
   ! rho_pol_norm = rho_pinch_model_max.
   ! It is exactly zero for rho_pol_norm >= rho_pinch_model_max.
   rho_pinch_axis_width = 0.02
-  rho_pinch_model_max = 0.99
+  rho_pinch_model_max = 0.95
   rho_pinch_edge_width = 0.03
 
   ! Width of the cubic smoothstep diffusion ramp near the outer cutoff.
