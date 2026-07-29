@@ -15,6 +15,9 @@ MODULE in_out
   USE GLOBALS
   USE MPI_OMP
   USE printutils
+#ifdef VENUS
+  USE neutral_coupling, ONLY: save_coupled_neutral_density
+#endif
 
   IMPLICIT NONE
 
@@ -547,6 +550,11 @@ CONTAINS
     CALL HDF5_group_close(group_id1, ierr)
 
     CALL save_neutral_flux_limiter_diagnostics()
+#ifdef VENUS
+    IF (MPIvar%glob_id == 0) THEN
+       CALL save_coupled_neutral_density(file_id)
+    END IF
+#endif
     CALL diag%write_hdf5(file_id)
 
     IF (switch%transport_1d) THEN
@@ -798,6 +806,11 @@ CONTAINS
     END IF
 
     CALL save_neutral_flux_limiter_diagnostics()
+#ifdef VENUS
+    IF (MPIvar%glob_id == 0) THEN
+       CALL save_coupled_neutral_density(file_id)
+    END IF
+#endif
     CALL diag%write_hdf5(file_id)
 
     IF (ASSOCIATED(T_glob)) THEN
@@ -1108,6 +1121,7 @@ CONTAINS
       CALL HDF5_logical_saving(group_id2, switch%decoup, 'decoup')
       CALL HDF5_logical_saving(group_id2, switch%ckeramp, 'ckeramp')
       CALL HDF5_logical_saving(group_id2, switch%saveNR, 'saveNR')
+      CALL HDF5_logical_saving(group_id2, switch%savePicard, 'savePicard')
       CALL HDF5_logical_saving(group_id2, switch%saveTau, 'saveTau')
       CALL HDF5_logical_saving(group_id2, switch%fixdPotLim, 'fixdPotLim')
       CALL HDF5_logical_saving(group_id2, switch%dirivortcore, 'dirivortcore')
@@ -1121,6 +1135,7 @@ CONTAINS
       CALL HDF5_logical_saving(group_id2, switch%import_diffusion_1D, 'import_diffusion_1D')
       CALL HDF5_logical_saving(group_id2, switch%neutral_wall_sources_in_elements, 'neutral_wall_sources_in_elements')
       CALL HDF5_logical_saving(group_id2, switch%neutral_perpendicular_diffusion, 'neutral_perpendicular_diffusion')
+      CALL HDF5_logical_saving(group_id2, switch%neutral_muscl, 'neutral_muscl')
       CALL HDF5_group_close(group_id2, ierr)
 
       ! Create numerics parameters group

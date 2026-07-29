@@ -1,8 +1,14 @@
 PROGRAM MHDG
   USE Main_utils
   USE MPI_OMP
+  USE neutral_coupling
 
   IMPLICIT NONE
+
+  LOGICAL :: picard_converged, nr_converged
+  INTEGER :: ipicard
+  REAL*8  :: picard_residual
+  REAL*8  :: tNR_dynamic
 
   ! Initialize MPI
   CALL init_MPI_OMP()
@@ -27,6 +33,10 @@ PROGRAM MHDG
 
   ! Read input file param.txt
   CALL read_input()
+
+  ! Venus banner, printed as early as possible: right after reading param.txt
+  ! and BEFORE the heavy initialization (mesh, factorization). Venus only.
+  CALL neutral_coupling_banner()
 
 #ifdef WITH_PETSC
   IF (lssolver%sollib .EQ. 3) THEN
@@ -188,6 +198,9 @@ PROGRAM MHDG
   ! Allocate and initialize uiter, uiter_best, qiter_best, u0, u_conv, q_conv
   CALL initialize_solu0_uiter_uconv()
 
+  ! Initialise the neutral coupling API
+  CALL neutral_coupling_init()
+
   errNR_adapt = 1e10
   ir_adapt = 0
   ir_check = 0
@@ -202,7 +215,9 @@ PROGRAM MHDG
   !*******************************************************
   !                  TIME LOOP
   !*******************************************************
-  DO it = it0, nts ! ************ TIME LOOP *********************
+  it = it0 - 1
+  DO WHILE (it < nts) ! ************ TIME LOOP *********************
+     it = it + 1
 
      ! if a new time step starts, it means that the solution converged sol%u_conv = sol%u, sol%q_conv = sol%q
      CALL update_uconv_qconv(sol%u, sol%q)
@@ -219,172 +234,263 @@ PROGRAM MHDG
         WRITE (6, '(" *", 60("*"), "**")')
      END IF
 
-     !*******************************************************
-     !             Newton-Raphson iterations
-     !*******************************************************
-     ! uiter = sol%u0
-     CALL update_uiter()
+      CALL neutral_coupling_begin_timestep(sol%u)
 
-     ir = 1
-     DO WHILE(ir .LE. numer%nrp) ! ************ NEWTON-RAPHSON LOOP *********************
-        ! update nonconstant dumping factor
-        CALL update_dumpnr()
+      !*******************************************************
+      !             Picard iteration loop
+      !*******************************************************
+      picard_converged = .FALSE.
+      ipicard = 1
+      picard_residual = 1.d0
 
-        IF (MPIvar%glob_id .EQ. 0) THEN
-           WRITE (6, *) "***** NR iteration: ", ir, "*****"
-           WRITE (6, *) "NR dumping factor:  ",  numer%dumpnr
-        ENDIF
-        
-        !update 1D transport stuff if used
-        IF (switch%transport_1d) THEN
-            CALL update_reduced_transport_profiles()
-        ENDIF
+      DO WHILE (.NOT. picard_converged .AND. ipicard <= numer%picard_max_iter)
+         IF (MPIvar%glob_id .EQ. 0 .AND. TRIM(ADJUSTL(simpar%neutral_model_type)) /= 'None') THEN
+            WRITE (6, '(/, "==========================================================")')
+            WRITE (6, '("   [PICARD LOOP] Iteration ", I2, " / ", I2)') ipicard, numer%picard_max_iter
+            WRITE (6, '("==========================================================")')
+            WRITE (6, '("   [NEUTRAL SOLVER] Solving neutral model (", A, ")...")') TRIM(ADJUSTL(simpar%neutral_model_type))
+         END IF
 
-        ! Compute Jacobian
-        CALL HDG_computeJacobian()
-        ! Set boundary conditions
-        CALL hdg_BC()
-        ! Compute elemental mapping
-        CALL hdg_Mapping()
-        ! Assembly the global matrix
-        CALL hdg_Assembly()
-        ! Solve linear system
+         ! 1. Solve a step of the chosen neutral model and update sources at Gauss points
+         CALL neutral_coupling_solve_step(sol%u)
+
+         IF (MPIvar%glob_id .EQ. 0 .AND. TRIM(ADJUSTL(simpar%neutral_model_type)) /= 'None') THEN
+            WRITE (6, '("   [PLASMA SOLVER] Solving non-linear HDG plasma equations...")')
+         END IF
+
+         ! 2. Solve plasma by Newton-Raphson
+         ! uiter = sol%u0
+         CALL update_uiter()
+
+         ! Compute dynamic Newton-Raphson tolerance for coupled runs (Inexact NR)
+         IF (neutral_coupling_is_active() .AND. numer%picard_eta > 0.d0) THEN
+            tNR_dynamic = MAX(numer%tNR, numer%picard_eta * picard_residual)
+            IF (MPIvar%glob_id .EQ. 0) THEN
+               WRITE (6, '("      -> Dynamic NR target tolerance: ", E12.5)') tNR_dynamic
+            END IF
+         ELSE
+            tNR_dynamic = numer%tNR
+         END IF
+
+         nr_converged = .FALSE.
+         ir = 1
+         DO WHILE(ir .LE. numer%nrp) ! ************ NEWTON-RAPHSON LOOP *********************
+            ! update nonconstant dumping factor
+            CALL update_dumpnr()
+
+            IF (MPIvar%glob_id .EQ. 0) THEN
+               IF (TRIM(ADJUSTL(simpar%neutral_model_type)) /= 'None') THEN
+                  WRITE (6, '("      -> NR Iteration ", I2, " (Dumping factor: ", F8.5, ")")') ir, numer%dumpnr
+               ELSE
+                  WRITE (6, *) "***** NR iteration: ", ir, "*****"
+                  WRITE (6, *) "NR dumping factor:  ",  numer%dumpnr
+               END IF
+            ENDIF
+            
+            !update 1D transport stuff if used
+            IF (switch%transport_1d) THEN
+                CALL update_reduced_transport_profiles()
+            ENDIF
+
+            ! Compute Jacobian
+            CALL HDG_computeJacobian()
+            ! Set boundary conditions
+            CALL hdg_BC()
+            ! Compute elemental mapping
+            CALL hdg_Mapping()
+            ! Assembly the global matrix
+            CALL hdg_Assembly()
+            ! Solve linear system
 #ifdef WITH_PETSC
-        CALL solve_global_system(ir)
+            CALL solve_global_system(ir)
 #else
-        CALL solve_global_system()
+            CALL solve_global_system()
 #endif
-        ! Compute element-by-element solution
-        CALL compute_element_solution()
-        ! Check for NaN (should work with optimization flags)
-        CALL check_for_NaNs()
-        IF (adapt%adaptivity .AND. restart_adapt) THEN
-           IF (switch%ME .EQV. .TRUE.) THEN
-              time%it=time%it-1
-           ENDIF
-           CALL adaptivity()
-           IF (switch%ME .EQV. .TRUE.) THEN
-            time%it=time%it+1
-           ENDIF
-           DEALLOCATE(uiter)
-           ALLOCATE(uiter(SIZE(sol%u)))
-           uiter = 0.
-        ENDIF
+            ! Compute element-by-element solution
+            CALL compute_element_solution()
 
-        ! Apply threshold
-        ! CALL HDG_applyThreshold(mkelms)
+            ! Check for NaN
+            CALL check_for_NaNs()
+            IF (adapt%adaptivity .AND. restart_adapt) THEN
+               IF (switch%ME .EQV. .TRUE.) THEN
+                  time%it=time%it-1
+               ENDIF
+               CALL adaptivity()
+               IF (switch%ME .EQV. .TRUE.) THEN
+                time%it=time%it+1
+               ENDIF
+               DEALLOCATE(uiter)
+               ALLOCATE(uiter(SIZE(sol%u)))
+               uiter = 0.
+            ENDIF
 
-        ! Apply filtering
-        ! CALL HDG_FilterSolution()
+            ! Apply threshold
+            ! CALL HDG_applyThreshold(mkelms)
 
-        ! Compute error on oscillations, print max value of oscillation and save solution as check-point if oscillations are lower than threshold
-        IF (adapt%adaptivity) THEN
-           CALL compute_error_oscillations(oscillations, min_osc, max_osc, n_osc, ir, ir_check, Mesh_prec)
-        ENDIF
-        ! Save solution
-        IF (switch%saveNR) THEN
-           CALL setSolName(save_name, mesh_name, ir, .FALSE., .TRUE.)
-           CALL HDF5_save_solution(save_name)
-        END IF
+            ! Apply filtering
+            ! CALL HDG_FilterSolution()
 
-        ! Check convergence of Newton-Raphson
-        errNR = computeResidual(sol%u, uiter, 1.)
-        errNR = errNR/numer%dumpnr
+            ! Compute error on oscillations, print max value of oscillation and save solution as check-point if oscillations are lower than threshold
+            IF (adapt%adaptivity) THEN
+               CALL compute_error_oscillations(oscillations, min_osc, max_osc, n_osc, ir, ir_check, Mesh_prec)
+            ENDIF
+            ! Save solution
+            IF (switch%saveNR) THEN
+               IF (neutral_coupling_is_active()) THEN
+                  CALL setSolName(save_name, mesh_name, ir, .FALSE., .TRUE., ipicard)
+               ELSE
+                  CALL setSolName(save_name, mesh_name, ir, .FALSE., .TRUE.)
+               END IF
+               CALL HDF5_save_solution(save_name)
+            END IF
 
-        IF (MPIvar%glob_id .EQ. 0) THEN
-           WRITE (*, *)   "Error:                  ", errNR
+            ! Check convergence of Newton-Raphson
+            errNR = computeResidual(sol%u, uiter, 1.)
+            errNR = errNR/numer%dumpnr
+
+            IF (MPIvar%glob_id .EQ. 0) THEN
+               IF (TRIM(ADJUSTL(simpar%neutral_model_type)) /= 'None') THEN
+                  WRITE (6, '("      -> NR L2 relative error: ", E12.5)') errNR
+               ELSE
+                  WRITE (*, *)   "Error:                  ", errNR
 #ifdef WITH_PETSC
-           IF(lssolver%sollib .EQ. 3) THEN
-              WRITE (*, *) "Relative Residue PETSc: ", matPETSC%residue
-              WRITE (*,*)  "Number of Iterations:   ", matPETSC%its
-              WRITE (*,*)  "Converged Reason:       ", matPETSC%convergedReason
-           END IF
+                  IF(lssolver%sollib .EQ. 3) THEN
+                     WRITE (*, *) "Relative Residue PETSc: ", matPETSC%residue
+                     WRITE (*,*)  "Number of Iterations:   ", matPETSC%its
+                     WRITE (*,*)  "Converged Reason:       ", matPETSC%convergedReason
+                  END IF
 #endif
-        ENDIF
+               END IF
+            ENDIF
 
-        IF (errNR .LT. numer%tNR) THEN
-           ! Save check-point solution if NR error is smaller than threshold
-           WRITE(*,*) "Solution saved as checkpoint."
-           CALL update_uconv_qconv(uiter_best, qiter_best)
-           errNR_adapt = 1e10
-           ir_adapt = 0
-           ir_check = 1
-           CALL free_mesh_loc(Mesh_prec)
-           CALL deep_copy_mesh_struct(Mesh, Mesh_prec)
-           EXIT
-        ELSEIF (errNR .GT. numer%div) THEN
-           WRITE (6, *) 'Problem in the N-R procedure'
-           STOP
-        ELSE
-           uiter = sol%u
-           !! ADAPTIVITY
-           IF(errNR .LT. errNR_adapt) THEN
+            IF (errNR .LT. tNR_dynamic) THEN
+               ! Save check-point solution if NR error is smaller than threshold
+               IF (MPIvar%glob_id .EQ. 0) THEN
+                  IF (neutral_coupling_is_active()) THEN
+                     WRITE(6, '("      -> NR Converged in ", I2, " iterations (Error: ", E12.5, ")")') ir, errNR
+                  ELSE
+                     WRITE(*,*) "Solution saved as checkpoint."
+                  END IF
+               END IF
+               CALL update_uconv_qconv(uiter_best, qiter_best)
+               errNR_adapt = 1e10
+               ir_adapt = 0
+               ir_check = 1
+               CALL free_mesh_loc(Mesh_prec)
+               CALL deep_copy_mesh_struct(Mesh, Mesh_prec)
+               nr_converged = .TRUE.
+               EXIT
+            ELSEIF (errNR .GT. numer%div) THEN
+               WRITE (6, *) 'Problem in the N-R procedure'
+               STOP
+            ELSE
+               uiter = sol%u
+               !! ADAPTIVITY
+               IF(errNR .LT. errNR_adapt) THEN
 
-              errNR_adapt = errNR
-              ir_adapt = ir
+                  errNR_adapt = errNR
+                  ir_adapt = ir
 
-              ! if the NR is the lowest reached so far, then save it as best check-point
-              IF (MPIvar%glob_id .EQ. 0) THEN
-                 WRITE(*,*) "Solution saved as last checkpoint."
-              ENDIF
+                  ! if the NR is the lowest reached so far, then save it as best check-point
+                  IF (MPIvar%glob_id .EQ. 0 .AND. TRIM(ADJUSTL(simpar%neutral_model_type)) == 'None') THEN
+                     WRITE(*,*) "Solution saved as last checkpoint."
+                  ENDIF
 
-              CALL update_uiter_qiter_best(uiter_best, qiter_best, sol%u, sol%q)
-              divergence_counter_adapt = 0
-           ELSEIF(errNR .GT. errNR_adapt) THEN
-              divergence_counter_adapt = divergence_counter_adapt + 1
-           ENDIF
+                  CALL update_uiter_qiter_best(uiter_best, qiter_best, sol%u, sol%q)
+                  divergence_counter_adapt = 0
+               ELSEIF(errNR .GT. errNR_adapt) THEN
+                  divergence_counter_adapt = divergence_counter_adapt + 1
+               ENDIF
 
-           IF (MPIvar%glob_id .EQ. 0) THEN
-              WRITE(*,*) "ir_check: ", ir_check
-           ENDIF
+               IF (MPIvar%glob_id .EQ. 0 .AND. TRIM(ADJUSTL(simpar%neutral_model_type)) == 'None') THEN
+                  WRITE(*,*) "ir_check: ", ir_check
+               ENDIF
 
-           ! Call adaptivity if one of the following conditions is respected
-           IF ((adapt%adaptivity) .AND. ((adapt%osc_adapt .AND. (max_osc .GT. adapt%osc_tol)) .OR. ((adapt%NR_adapt) .AND. (MOD(ir,adapt%freq_NR_adapt) .EQ. 0)))) THEN !  .or. (flag)) THEN
+               ! Call adaptivity if one of the following conditions is respected
+               IF ((adapt%adaptivity) .AND. ((adapt%osc_adapt .AND. (max_osc .GT. adapt%osc_tol)) .OR. ((adapt%NR_adapt) .AND. (MOD(ir,adapt%freq_NR_adapt) .EQ. 0)))) THEN !  .or. (flag)) THEN
 
-              IF (switch%ME .EQV. .TRUE.) THEN
-               time%it=time%it-1
-              ENDIF
-              ! call adaptivity precedure
-              CALL adaptivity()
-              IF (switch%ME .EQV. .TRUE.) THEN
-               time%it=time%it+1
-              ENDIF
+                  IF (switch%ME .EQV. .TRUE.) THEN
+                   time%it=time%it-1
+                  ENDIF
+                  ! call adaptivity precedure
+                  CALL adaptivity()
+                  IF (switch%ME .EQV. .TRUE.) THEN
+                   time%it=time%it+1
+                  ENDIF
 
-              ! u0 also needs to be projected from old mesh to new mesh
-              CALL project_u0_newmesh()
+                  ! u0 also needs to be projected from old mesh to new mesh
+                  CALL project_u0_newmesh()
 
-              IF((adapt%NR_adapt) .AND. (MOD(ir,adapt%freq_NR_adapt) .EQ. 0)) THEN
-                 ! Update check-point solution to the one projected on the new mesh
-                 DEALLOCATE(sol%u_conv)
-                 ALLOCATE(sol%u_conv(SIZE(sol%u)))
-                 sol%u_conv = sol%u
-                 DEALLOCATE(sol%q_conv)
-                 ALLOCATE(sol%q_conv(SIZE(sol%q)))
-                 sol%q_conv = sol%q
-              ENDIF
+                  IF((adapt%NR_adapt) .AND. (MOD(ir,adapt%freq_NR_adapt) .EQ. 0)) THEN
+                     ! Update check-point solution to the one projected on the new mesh
+                     DEALLOCATE(sol%u_conv)
+                     ALLOCATE(sol%u_conv(SIZE(sol%u)))
+                     sol%u_conv = sol%u
+                     DEALLOCATE(sol%q_conv)
+                     ALLOCATE(sol%q_conv(SIZE(sol%q)))
+                     sol%q_conv = sol%q
+                  ENDIF
 
-              ! update uiter to new mapped solution
-              CALL update_uiter()
+                  ! update uiter to new mapped solution
+                  CALL update_uiter()
 
-              IF(ir_check .NE. numer%nrp) THEN
-                 ir = ir_check
-              ELSE
-                 ir = 0
-              ENDIF
+                  IF(ir_check .NE. numer%nrp) THEN
+                     ir = ir_check
+                  ELSE
+                     ir = 0
+                  ENDIF
 
-              CALL free_mesh_loc(Mesh_prec)
-              CALL deep_copy_mesh_struct(Mesh, Mesh_prec)
+                  CALL free_mesh_loc(Mesh_prec)
+                  CALL deep_copy_mesh_struct(Mesh, Mesh_prec)
 
-           ENDIF
-        END IF
+               ENDIF
+            END IF
 
-        IF (MPIvar%glob_id .EQ. 0) THEN
-           WRITE (6, *) "*********************************"
-           WRITE (6, *) " "
-           WRITE (6, *) " "
-        ENDIF
-        ir = ir + 1
-     END DO ! ************ END OF NEWTON-RAPHSON LOOP *********************
+            IF (MPIvar%glob_id .EQ. 0 .AND. TRIM(ADJUSTL(simpar%neutral_model_type)) == 'None') THEN
+               WRITE (6, *) "*********************************"
+               WRITE (6, *) " "
+               WRITE (6, *) " "
+            ENDIF
+            ir = ir + 1
+         END DO ! ************ END OF NEWTON-RAPHSON LOOP *********************
+
+         IF (neutral_coupling_is_active() .AND. .NOT. nr_converged) THEN
+            IF (MPIvar%glob_id .EQ. 0) THEN
+               WRITE (6, *) 'WARNING: Newton-Raphson did not converge within nrp iterations.'
+               WRITE (6, *) '         Proceeding with the current solution (legacy behaviour).'
+            END IF
+         END IF
+
+         ! 3. Check global Picard convergence
+         IF (.NOT. neutral_coupling_is_active()) THEN
+            picard_converged = .TRUE.
+         ELSE
+            picard_converged = neutral_coupling_is_converged(sol%u, picard_residual)
+            IF (MPIvar%glob_id .EQ. 0) THEN
+               IF (picard_converged) THEN
+                  WRITE (6, '("   [PICARD LOOP] CONVERGED (Self-consistent state found)", /)')
+               ELSE
+                  WRITE (6, '("   [PICARD LOOP] Not converged yet. Proceeding to next step...", /)')
+               END IF
+            END IF
+         END IF
+
+         ! Snapshot at every Picard iteration (plasma + neutrals): same idea as
+         ! saveNR, but at the segregated coupling level. Name ..._Pic<ipicard>_<it>.
+         IF (switch%savePicard .AND. neutral_coupling_is_active()) THEN
+            CALL setSolName(save_name, mesh_name, time%it, .TRUE., .FALSE., ipicard)
+            CALL HDF5_save_solution(save_name)
+         END IF
+
+         ipicard = ipicard + 1
+      END DO ! ************ END OF PICARD LOOP *********************
+
+      IF (neutral_coupling_is_active() .AND. .NOT. picard_converged) THEN
+         IF (MPIvar%glob_id .EQ. 0) THEN
+            WRITE (6, *) 'WARNING: Picard coupling did not converge within picard_max_iter.'
+            WRITE (6, *) '         Proceeding with current solution (legacy behaviour).'
+         END IF
+      END IF
 
      !  ! Apply threshold
      !  CALL HDG_applyThreshold()
@@ -460,6 +566,15 @@ PROGRAM MHDG
 
            ! update u0
            CALL update_solution()
+
+           ! Pseudo-transient continuation (segregated Venus coupling): dt is
+           ! grown as the solution settles (SER ramp, compute_dt). A finite step
+           ! keeps the BDF anchor that stabilizes the Picard coupling early on,
+           ! and relaxes towards Newton later -> the segregated steady state is
+           ! reached in transient mode, not with steady=.true.. Guarded by
+           ! Venus + transient: the monolithic path (neutral_coupling inactive)
+           ! is never affected.
+           IF (neutral_coupling_is_active()) CALL compute_dt(errlstime, venus_dt_max)
 
            ! call the adaptive procedure if time refinement is on
            IF((adapt%adaptivity) .AND. (adapt%time_adapt) .AND. (MOD(it,adapt%freq_t_adapt) .EQ. 0)) THEN

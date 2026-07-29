@@ -1993,7 +1993,7 @@ CONTAINS
   ! ******************************
   ! Neutral Source terms
   ! ******************************
-#ifdef NEUTRAL
+#if defined(NEUTRAL) || defined(VENUS)
   SUBROUTINE compute_RN(E,theta,RN)
     ! Compute the recycling coefficeint RN(E,theta) interpolating the TRIM data
     USE interpolation
@@ -3798,6 +3798,285 @@ ENDSUBROUTINE  compute_ddissip_du
         dcs_du = dcs_du/3./cs*soft_deriv
       !endif
     ENDSUBROUTINE compute_dcs_du
+#endif
+
+#if defined(NEUTRAL) || defined(VENUS)
+  !********************************************************************
+  !
+  !         PLASMA <-> NEUTRAL ATOMIC SOURCE TERMS
+  !
+  ! Extracted from hdg_ComputeJacobian.f90, where assemblyNeutral and its
+  ! feeding block were INTERNAL procedures of HDG_computeJacobian, hence
+  ! not callable from the outside. It is this structure, and not a lack of
+  ! rigour, that forced the duplication in venus_physics.f90.
+  !
+  ! U(phys%idx_rhon_eq) carries the neutral density, WHEREVER IT COMES FROM:
+  ! the HDG solution in the monolithic solver, an external finite volume
+  ! solver in Venus. This is the sole purpose of this extraction.
+  !
+  ! Convention (quasilinear form A.U = rhs, not J.dU = -F):
+  !   Sn  = -dS/dU
+  !   Sn0 = -S + (dS/dU).U     <- the recentring term
+  !
+  ! Pure relocation: no change of logic. The monolithic solver must remain
+  ! bit-for-bit identical.
+  !********************************************************************
+  SUBROUTINE compute_neutral_sources(U, Sn, Sn0)
+    REAL*8, INTENT(IN)  :: U(:)
+    REAL*8, INTENT(OUT) :: Sn(:,:), Sn0(:)
+    REAL*8                    :: niz,nrec,fGammacx,fGammarec
+    REAL*8                    :: dniz_dU(SIZE(U)),dnrec_dU(SIZE(U))
+    REAL*8                    :: dfGammacx_dU(SIZE(U)),dfGammarec_dU(SIZE(U))
+#ifdef NEUTRALGAMMA
+    REAL*8                    :: fGammaN
+    REAL*8                    :: dfGammaN_dU(SIZE(U))
+#endif
+#ifdef TEMPERATURE
+    REAL*8                    :: sigmaviz,sigmavrec,sigmavcx,fEiiz,fEirec,fEicx
+#ifdef NEUTRALGAMMA
+    REAL*8                    :: fEiN
+    REAL*8                    :: dfEiN_dU(SIZE(U))
+#endif
+    !amjuel radiation losses
+    REAL*8                    :: sigmavEiz,sigmavErec
+    REAL*8                    :: dsigmavEiz_dU(SIZE(U)),dsigmavErec_dU(SIZE(U))
+    REAL*8                    :: cooling_factor
+    REAL*8                    :: dcooling_factor_dU(SIZE(U))
+    REAL*8                    :: dsigmaviz_dU(SIZE(U)),dsigmavrec_dU(SIZE(U)),dsigmavcx_dU(SIZE(U))
+    REAL*8                    :: dfEiiz_dU(SIZE(U)),dfEirec_dU(SIZE(U)),dfEicx_dU(SIZE(U))
+#endif
+
+    !Neutral Source Terms needed in the plasma and neutral density equations
+        CALL compute_niz(U,niz)
+        CALL compute_nrec(U,nrec)
+        CALL compute_dniz_dU(U,dniz_dU)
+        CALL compute_dnrec_dU(U,dnrec_dU)
+#ifdef TEMPERATURE
+        CALL compute_sigmaviz(U,sigmaviz)
+        CALL compute_sigmavrec(U,sigmavrec)
+        CALL compute_dsigmaviz_dU(U,dsigmaviz_dU)
+        CALL compute_dsigmavrec_dU(U,dsigmavrec_dU)
+#endif
+    !Neutral Source Terms needed in the plasma momentum equation
+        CALL compute_fGammacx(U,fGammacx)
+        CALL compute_dfGammacx_dU(U,dfGammacx_dU)
+        CALL compute_fGammarec(U,fGammarec)
+        CALL compute_dfGammarec_dU(U,dfGammarec_dU)
+#ifdef NEUTRALGAMMA
+        CALL compute_fGammaN(U,fGammaN)
+        CALL compute_dfGammaN_dU(U,dfGammaN_dU)
+#endif
+#ifdef TEMPERATURE
+        CALL compute_sigmavcx(U,sigmavcx)
+        CALL compute_dsigmavcx_dU(U,dsigmavcx_dU)
+    !Neutral Source Terms needed in the ion energy equation
+        CALL compute_fEiiz(U,fEiiz)
+        CALL compute_dfEiiz_dU(U,dfEiiz_dU)
+        CALL compute_fEirec(U,fEirec)
+        CALL compute_dfEirec_dU(U,dfEirec_dU)
+        CALL compute_fEicx(U,fEicx)
+        CALL compute_dfEicx_dU(U,dfEicx_dU)
+#ifdef NEUTRALGAMMA
+        CALL compute_fEiN(U,fEiN)
+        CALL compute_dfEiN_dU(U,dfEiN_dU)
+#endif
+    !Neutral Source Terms needed in the electron energy equation
+    IF (switch%impurity_radiation) THEN
+        CALL compute_cooling_factor(U,cooling_factor)
+        CALL compute_dcooling_factor_dU(U,dcooling_factor_dU)
+    ELSE
+        cooling_factor = 0.
+        dcooling_factor_dU = 0.
+    ENDIF
+
+    call compute_sigmavEiz(U,sigmavEiz)
+    call compute_sigmavErec(U,sigmavErec)
+    call compute_dsigmavEiz_dU(U,dsigmavEiz_dU)
+    call compute_dsigmavErec_dU(U,dsigmavErec_dU)
+#endif
+
+    !Assembly the matrix for neutral sources
+#ifdef TEMPERATURE
+IF (switch%impurity_radiation) THEN
+#ifdef NEUTRALGAMMA
+  call assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
+    &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
+    &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,fEiN,dfEiN_dU,Sn,Sn0, &
+    sigmavEiz=sigmavEiz,dsigmavEiz_dU=dsigmavEiz_dU,sigmavErec=sigmavErec,dsigmavErec_dU=dsigmavErec_dU,&
+    cooling_factor=cooling_factor,dcooling_factor_dU=dcooling_factor_dU)
+#else
+  call assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
+    &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
+    &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,Sn,Sn0, &
+    sigmavEiz=sigmavEiz,dsigmavEiz_dU=dsigmavEiz_dU,sigmavErec=sigmavErec,dsigmavErec_dU=dsigmavErec_dU,&
+    cooling_factor=cooling_factor,dcooling_factor_dU=dcooling_factor_dU)
+#endif
+ELSE
+#ifdef NEUTRALGAMMA
+  call assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
+    &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
+    &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,fEiN,dfEiN_dU,Sn,Sn0, &
+    sigmavEiz=sigmavEiz,dsigmavEiz_dU=dsigmavEiz_dU,sigmavErec=sigmavErec,dsigmavErec_dU=dsigmavErec_dU)
+#else
+  call assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
+    &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
+    &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,Sn,Sn0, &
+    sigmavEiz=sigmavEiz,dsigmavEiz_dU=dsigmavEiz_dU,sigmavErec=sigmavErec,dsigmavErec_dU=dsigmavErec_dU)
+#endif
+ENDIF
+#else
+#ifdef NEUTRALGAMMA
+        CALL assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,Sn,Sn0)
+#else
+        CALL assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,Sn,Sn0)
+#endif
+#endif
+  ENDSUBROUTINE compute_neutral_sources
+
+  !********************************************************************
+  !
+  !         ASSEMBLY NEUTRAL SOURCE MATRIX
+  !
+  !********************************************************************
+#ifdef TEMPERATURE
+#ifdef NEUTRALGAMMA
+  SUBROUTINE assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
+      &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
+      &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,fEiN,dfEiN_dU,Sn,Sn0,&
+      sigmavEiz,dsigmavEiz_dU,sigmavErec,dsigmavErec_dU,cooling_factor,dcooling_factor_dU)
+#else
+  SUBROUTINE assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,sigmaviz,dsigmaviz_dU,sigmavrec,dsigmavrec_dU,&
+      &fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,sigmavcx,dsigmavcx_dU,fEiiz,&
+      &dfEiiz_dU,fEirec,dfEirec_dU,fEicx,dfEicx_dU,Sn,Sn0,&
+      sigmavEiz,dsigmavEiz_dU,sigmavErec,dsigmavErec_dU,cooling_factor,dcooling_factor_dU)
+#endif
+#else
+#ifdef NEUTRALGAMMA
+    SUBROUTINE assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,fGammaN,dfGammaN_dU,Sn,Sn0)
+#else
+    SUBROUTINE assemblyNeutral(U,niz,dniz_dU,nrec,dnrec_dU,fGammacx,dfGammacx_dU,fGammarec,dfGammarec_dU,Sn,Sn0)
+#endif
+#endif
+             REAL*8, INTENT(IN) :: niz,nrec,fGammacx,fGammarec
+             REAL*8, INTENT(IN) :: U(:),dniz_dU(:),dnrec_dU(:),dfGammacx_dU(:),dfGammarec_dU(:)
+#ifdef NEUTRALGAMMA
+             REAL*8, INTENT(IN) :: fGammaN
+             REAL*8, INTENT(IN) :: dfGammaN_dU(:)
+#endif
+#ifndef TEMPERATURE
+             REAL*8             :: sigmaviz,sigmavrec,sigmavcx
+#else
+      REAL*8, INTENT(IN)        :: sigmaviz,sigmavrec,sigmavcx,fEiiz,fEirec,fEicx      
+      REAL*8, INTENT(IN)        :: dsigmaviz_dU(:),dsigmavrec_dU(:),dsigmavcx_dU(:)
+      REAL*8, INTENT(IN)        :: dfEiiz_dU(:),dfEirec_dU(:),dfEicx_dU(:)
+#ifdef NEUTRALGAMMA
+      REAL*8, INTENT(IN)        :: fEiN
+      REAL*8, INTENT(IN)        :: dfEiN_dU(:)
+#endif
+      REAL*8, INTENT(IN), OPTIONAL :: sigmavEiz,sigmavErec,dsigmavEiz_dU(:),dsigmavErec_dU(:)
+      REAL*8, INTENT(IN), OPTIONAL :: cooling_factor,dcooling_factor_dU(:)
+#endif
+             REAL*8             :: RE,Sn(:,:),Sn0(:)
+#ifdef TEMPERATURE
+             REAL*8             :: recombination_energy
+#endif
+             INTEGER*4          :: ign, inn
+
+      Sn   = 0.
+      Sn0  = 0.
+      ! RE=1 enables the ion energy source from ionization (Franck-Condon
+      ! birth at 3 eV carried by fEiiz); RE=0 disables it.
+      RE   = 1.
+      inn  = phys%idx_rhon_eq
+      ign  = phys%idx_gamman_eq
+#ifdef TEMPERATURE
+      recombination_energy = neutral_rt%recombination_energy
+#endif
+
+#ifndef TEMPERATURE
+      sigmaviz   = 3.01e-14*simpar%refval_density*simpar%refval_time
+      sigmavrec  = 1.3638e-20*simpar%refval_density*simpar%refval_time
+      sigmavcx   = 4.0808e-15*simpar%refval_density*simpar%refval_time
+#endif
+
+
+      !Assembly Source Terms in plasma density equation
+      Sn(1,:)   = -dniz_dU(:)*sigmaviz + dnrec_dU(:)*sigmavrec
+#ifdef TEMPERATURE
+
+      Sn(1,:)   = Sn(1,:) - niz*dsigmaviz_dU(:) + nrec*dsigmavrec_dU(:)
+#endif
+      !Assembly Source Terms in plasma momentum equation
+
+      Sn(2,:) = dfGammacx_dU(:)*sigmavcx + dfGammarec_dU(:)*sigmavrec
+#ifdef NEUTRALGAMMA
+      Sn(2,:) = Sn(2,:) - (dfGammaN_dU(:)*sigmaviz + dfGammaN_dU(:)*sigmavcx)
+#endif
+#ifdef TEMPERATURE
+      Sn(2,:)   = Sn(2,:) + fGammacx*dsigmavcx_dU(:) + fGammarec*dsigmavrec_dU(:)
+#ifdef NEUTRALGAMMA
+      Sn(2,:)   = Sn(2,:) - (fGammaN*dsigmaviz_dU(:) + fGammaN*dsigmavcx_dU(:))
+#endif
+
+      !Assembly Source Terms in ion energy equation
+
+      Sn(3,:) = -RE*dfEiiz_dU(:)*sigmaviz + dfEirec_dU(:)*sigmavrec + dfEicx_dU(:)*sigmavcx
+      Sn(3,:) = Sn(3,:) - RE*fEiiz*dsigmaviz_dU(:) + fEirec*dsigmavrec_dU(:) + fEicx*dsigmavcx_dU(:)
+#ifdef NEUTRALGAMMA
+      Sn(3,:) = Sn(3,:) - (dfEiN_dU(:)*sigmaviz + dfEiN_dU(:)*sigmavcx + &
+           &fEiN*dsigmaviz_dU(:) + fEiN*dsigmavcx_dU(:))
+#endif
+      !Assembly Source Terms in electron energy equation
+      Sn(4,:) = dniz_dU(:)*sigmavEiz + niz*dsigmavEiz_dU(:) + &
+        &dnrec_dU(:)*sigmavErec + nrec*dsigmavErec_dU(:)
+      IF (PRESENT(cooling_factor)) THEN
+        Sn(4,:) = Sn(4,:) + phys%impurity_concentration*(nrec*dcooling_factor_dU(:) + dnrec_dU(:)*cooling_factor)
+      endif
+
+      Sn(4,:) = Sn(4,:) - recombination_energy*(dnrec_dU(:)*sigmavrec + nrec*dsigmavrec_dU(:))
+
+
+#endif
+      !Assembly Source Terms in neutral density equation
+      Sn(inn,:) = -Sn(1,:)
+#ifdef NEUTRALGAMMA
+      Sn(ign,:) = -Sn(2,:)
+#endif
+
+      !Assembly RHS Neutral Source Terms
+      Sn0(1)    = niz*sigmaviz - nrec*sigmavrec
+      Sn0(2)    = -fGammacx*sigmavcx - fGammarec*sigmavrec
+#ifdef NEUTRALGAMMA
+      Sn0(2)    = Sn0(2) + fGammaN*sigmaviz + fGammaN*sigmavcx
+#endif
+#ifdef TEMPERATURE
+      Sn0(1)    = Sn0(1) + niz*dot_PRODUCT(dsigmaviz_dU,U) - nrec*dot_PRODUCT(dsigmavrec_dU,U)
+      Sn0(2)    = Sn0(2) - fGammarec*dot_PRODUCT(dsigmavrec_dU,U)
+#ifdef NEUTRALGAMMA
+      Sn0(2)    = Sn0(2) + fGammaN*dot_PRODUCT(dsigmaviz_dU,U)
+#endif
+      Sn0(3)    = RE*fEiiz*sigmaviz - fEirec*sigmavrec - fEicx*sigmavcx
+#ifdef NEUTRALGAMMA
+      Sn0(3)    = Sn0(3) + fEiN*sigmaviz + fEiN*sigmavcx
+#endif
+      Sn0(4)    = nrec*sigmavrec*recombination_energy
+      Sn0(4)    = Sn0(4) - niz*sigmavEiz - nrec*sigmavErec
+      Sn0(3)    = Sn0(3) + RE*fEiiz*dot_PRODUCT(dsigmaviz_dU,U) - fEirec*dot_PRODUCT(dsigmavrec_dU,U)
+#ifdef NEUTRALGAMMA
+      Sn0(3)    = Sn0(3) + fEiN*dot_PRODUCT(dsigmaviz_dU,U)
+#endif
+      Sn0(4)    = Sn0(4) - niz*dot_product(dsigmavEiz_dU,U) - nrec*dot_product(dsigmavErec_dU,U)
+      Sn0(4)    = Sn0(4) + nrec*dot_PRODUCT(dsigmavrec_dU,U)*recombination_energy
+      IF (PRESENT(cooling_factor)) THEN
+        Sn0(4)    = Sn0(4) - phys%impurity_concentration*nrec*cooling_factor
+      ENDIF
+#endif
+      Sn0(inn)  = -Sn0(1)
+#ifdef NEUTRALGAMMA
+      Sn0(ign)  = -Sn0(2)
+#endif
+
+    ENDSUBROUTINE assemblyNeutral
 #endif
 
 END MODULE physics

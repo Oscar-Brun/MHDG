@@ -15,26 +15,28 @@ SUBROUTINE READ_input()
   IMPLICIT NONE
 
   LOGICAL               :: driftdia,driftexb, axisym, steady,dotiming,psdtime,decoup,bxgradb, read_gmsh,readMeshFromSol, set_2d_order, gmsh2h5,igz, adaptivity, time_adapt, NR_adapt, div_adapt, rest_adapt,osc_adapt
-  LOGICAL               :: ckeramp,saveNR,filter,saveTau,transport_1d,lstiming,fixdPotLim,dirivortcore,dirivortlim,convvort,logrho
+  LOGICAL               :: ckeramp,saveNR,savePicard,filter,saveTau,transport_1d,lstiming,fixdPotLim,dirivortcore,dirivortlim,convvort,logrho
   LOGICAL               :: neutral_wall_sources_in_elements
   LOGICAL               :: neutral_perpendicular_diffusion
+  LOGICAL               :: picard_emulation
+  LOGICAL               :: neutral_muscl
   INTEGER               :: thresh, difcor, tis, stab,pertini,init,order_2d
   INTEGER               :: itmax, itrace, rest, istop, sollib, kspitrace,rprecond, Nrprecond, kspitmax, kspnorm, gmresres,mglevels,mgtypeform
-  INTEGER               :: uinput, printint, testcase, nrp, balance_diagnostics_verbosity
+  INTEGER               :: uinput, printint, testcase, nrp, picard_max_iter, balance_diagnostics_verbosity
   INTEGER               :: nts, tsw, freqdisp, freqsave, shockcp, limrho
   INTEGER               :: shockcp_adapt, evaluator, difference, freq_t_adapt,freq_NR_adapt, quant_ind
   INTEGER,ALLOCATABLE,DIMENSION(:) :: n_quant_ind,param_est
   INTEGER               :: num_param_est, num_n_quant_ind
   REAL*8                :: thr_ind, tol_est, osc_tol, osc_check
   INTEGER               :: bcflags(1:10), ntor, ptor, npartor,bohmtypebc
-  REAL*8                :: dt0, R0, diff_n, diff_u, tau(1:6), tNr, tTM, div, Tbg, neutralp_lambda
+  REAL*8                :: dt0, R0, diff_n, diff_u, tau(1:6), tNr, tTM, div, Tbg, neutralp_lambda, picard_tol, picard_eta, picard_relax
   REAL*8                :: tfi, a, bohmth,bohm_energy_thresh, q, diffred, diffmin
   REAL*8                :: sc_coe, so_coe, df_coe, thr, thrpre, minrho, dc_coe, sc_sen
   REAL*8                :: epn, Mref, diff_pari, diff_e, Gmbohm, Gmbohme
   REAL*8                :: diff_pare, diff_ee, tie, dumpnr_min,dumpnr_max,dumpnr_width,dumpnr_n0, tmax, tol, rtol, atol
   REAL*8                :: diff_vort, diff_pot, etapar, Potfloat,diagsource(10)
   CHARACTER(100)        :: msg
-  CHARACTER(20)         :: kmethd, ptype, kspmethd, pctype
+  CHARACTER(20)         :: kmethd, ptype, kspmethd, pctype, neutral_model_type
 
   CHARACTER(len=20)     :: smther, smther2, prol, restr, solve, restr2, prol2, solve2, mlcycle
   CHARACTER(len=20)     :: aggr_prol, par_aggr_alg, aggr_ord, aggr_filter, csolve, csbsolve, cmat
@@ -95,10 +97,11 @@ SUBROUTINE READ_input()
 
   ! Defining the variables to READ from the file
   NAMELIST /SWITCH_LST/ steady,read_gmsh, readMeshFromSol, set_2d_order, order_2d, gmsh2h5, axisym,external_heating, impurity_radiation, init, driftdia, driftexb, testcase, OhmicSrc, ME,diff_reverse_Ip, target_variable, RMP, Ripple, psdtime, diffred, diffmin, &
-       & shockcp, limrho, difcor, thresh, filter, decoup, ckeramp, saveNR, saveTau, transport_1d, fixdPotLim, dirivortcore,dirivortlim, convvort,pertini,&
-       & logrho,bxgradb,flux_limiter,import_diffusion_1D,neutral_wall_sources_in_elements,neutral_perpendicular_diffusion
+       & shockcp, limrho, difcor, thresh, filter, decoup, ckeramp, saveNR, savePicard, saveTau, transport_1d, fixdPotLim, dirivortcore,dirivortlim, convvort,pertini,&
+       & logrho,bxgradb,flux_limiter,import_diffusion_1D,neutral_wall_sources_in_elements,neutral_perpendicular_diffusion,&
+       & picard_emulation,neutral_muscl,neutral_model_type
   NAMELIST /INPUT_LST/ field_path, field_dimensions,field_from_grid,compute_from_flux,divide_by_2pi, jtor_path, jtor_dimensions,external_heating_path,external_heating_from_grid, save_folder,puff_path,puff_dimension,target_density_path,target_density_dimension,target_density_xpr_path,target_density_xpr_dimension,impurity_concentration_path,impurity_concentration_dimension,zeff_path,zeff_dimension, diffusion_1D_path, transport_model_path
-  NAMELIST /NUMER_LST/ tau,nrp,tNR,tTM,div,sc_coe,sc_sen,minrho,so_coe,df_coe,dc_coe,thr,thrpre,stab,dumpnr_min,dumpnr_max,dumpnr_width,dumpnr_n0,ntor,ptor,tmax,npartor,bohmtypebc,exbdump,neutralp_lambda
+  NAMELIST /NUMER_LST/ tau,nrp,picard_max_iter,picard_tol,picard_eta,picard_relax,tNR,tTM,div,sc_coe,sc_sen,minrho,so_coe,df_coe,dc_coe,thr,thrpre,stab,dumpnr_min,dumpnr_max,dumpnr_width,dumpnr_n0,ntor,ptor,tmax,npartor,bohmtypebc,exbdump,neutralp_lambda
   NAMELIST /ADAPT_LST/ adaptivity,shockcp_adapt, evaluator, param_est, thr_ind, quant_ind, n_quant_ind,tol_est, difference, time_adapt, NR_adapt, freq_t_adapt, freq_NR_adapt, div_adapt, rest_adapt, osc_adapt, osc_tol, osc_check, geometry_path
   NAMELIST /GEOM_LST/ R0, q
   NAMELIST /MAGN_LST/ amp_rmp,nbCoils_rmp,torElongCoils_rmp,parite,nbRow,amp_ripple,nbCoils_ripple,triang,ellip ! RMP and Ripple
@@ -138,6 +141,16 @@ SUBROUTINE READ_input()
   recycling_neutral_gamma = 1.d0
   neutral_wall_sources_in_elements = .false.
   neutral_perpendicular_diffusion = .false.
+  picard_emulation = .false.
+  neutral_muscl = .false.
+  savePicard = .false.
+  neutral_model_type = 'None'
+  ! Segregated (Picard) coupling defaults: a param.txt without these keys keeps
+  ! the legacy behaviour unchanged.
+  picard_max_iter = 5
+  picard_tol = 1.d-3
+  picard_eta = 0.d0
+  picard_relax = 0.5d0
   neutral_flux_limiter_mode = 'off'
   neutral_flux_limiter_eps = 0.d0
   neutral_flux_limiter_fs_fraction = 1.d0
@@ -226,6 +239,7 @@ SUBROUTINE READ_input()
   switch%decoup           = decoup
   switch%ckeramp          = ckeramp
   switch%saveNR           = saveNR
+  switch%savePicard       = savePicard
   switch%saveTau          = saveTau
   switch%transport_1d = transport_1d
   switch%gmsh2h5          = gmsh2h5
@@ -243,6 +257,19 @@ SUBROUTINE READ_input()
   switch%import_diffusion_1D = import_diffusion_1D
   switch%neutral_wall_sources_in_elements = neutral_wall_sources_in_elements
   switch%neutral_perpendicular_diffusion = neutral_perpendicular_diffusion
+  switch%picard_emulation = picard_emulation
+  switch%neutral_muscl = neutral_muscl
+  simpar%neutral_model_type = TRIM(ADJUSTL(neutral_model_type))
+  IF (simpar%neutral_model_type == 'Off') simpar%neutral_model_type = 'None'
+  SELECT CASE (simpar%neutral_model_type)
+  ! 'Venus' = two-moment isothermal Euler solver, using the same segregated
+  ! coupling as 'Diffusion' (same B1/A4 transfers, same Picard loop).
+  CASE ('None', 'Diffusion', 'Venus')
+  CASE DEFAULT
+     PRINT *, 'Unknown neutral_model_type: ', TRIM(ADJUSTL(simpar%neutral_model_type))
+     PRINT *, 'Allowed values: None, Off, Diffusion, Venus'
+     STOP
+  END SELECT
   input%field_path        = TRIM(ADJUSTL(field_path))
   input%field_dimensions  = field_dimensions
   input%field_from_grid   = field_from_grid
@@ -267,6 +294,22 @@ SUBROUTINE READ_input()
   input%transport_model_path = TRIM(ADJUSTL(transport_model_path))
   numer%tau               = tau
   numer%nrp               = nrp
+  numer%picard_max_iter   = picard_max_iter
+  numer%picard_tol        = picard_tol
+  numer%picard_eta        = picard_eta
+  numer%picard_relax      = picard_relax
+  IF (numer%picard_max_iter < 1) THEN
+     PRINT *, 'picard_max_iter must be >= 1'
+     STOP
+  END IF
+  IF (numer%picard_tol <= 0.d0) THEN
+     PRINT *, 'picard_tol must be positive'
+     STOP
+  END IF
+  IF (numer%picard_relax <= 0.d0 .OR. numer%picard_relax > 1.d0) THEN
+     PRINT *, 'picard_relax must be in (0, 1]'
+     STOP
+  END IF
   numer%tNR               = tNR
   numer%tTM               = tTM
   numer%div               = div
@@ -292,6 +335,17 @@ SUBROUTINE READ_input()
   numer%exbdump           = exbdump
   numer%neutralp_lambda   = neutralp_lambda
   adapt%adaptivity        = adaptivity
+  ! The neutral coupling sizes its arrays (neutral_*_gauss) and its FV mesh
+  ! once and for all on Mesh%Nelems, inside neutral_coupling_init. Adaptivity
+  ! remeshes on the fly without anything re-initializing the coupling: the
+  ! DO iel = 1, Mesh%Nelems loops would then write out of bounds. Refuse
+  ! explicitly rather than silently corrupting the heap; this restriction can
+  ! be lifted once the coupling provides a remeshing hook.
+  IF (adapt%adaptivity .AND. simpar%neutral_model_type /= 'None') THEN
+     PRINT *, 'ERROR: adaptivity is not supported with the segregated neutral coupling.'
+     PRINT *, '       The neutral coupling arrays are sized once on the initial mesh.'
+     STOP
+  END IF
   adapt%shockcp_adapt     = shockcp_adapt
   num_param_est        = COUNT(param_est /= -1.0)
   ALLOCATE(adapt%param_est(num_param_est))
@@ -567,6 +621,8 @@ SUBROUTINE READ_input()
      PRINT *, '                - recycling coefficient for NeutralGamma Bohm:        ', phys%recycling_neutral_gamma
      PRINT *, '                - neutral wall sources in element volumes:           ', switch%neutral_wall_sources_in_elements
      PRINT *, '                - neutral perpendicular diffusion:                   ', switch%neutral_perpendicular_diffusion
+     PRINT *, '                - Picard emulation (segregated coupling):            ', switch%picard_emulation
+     PRINT *, '                - neutral MUSCL order-2 reconstruction (FV):         ', switch%neutral_muscl
      PRINT *, '                - applying trim:                                      ', phys%apply_trim
      PRINT *, '                - puff coefficient in the neutral equation:           ', phys%puff
      PRINT *, '                - cryopump power coefficient in the neutral equation: ', phys%cryopump_power
@@ -635,6 +691,7 @@ SUBROUTINE READ_input()
 #endif
      PRINT *, '                - ckeramp:                                            ', ckeramp
      PRINT *, '                - saveNR:                                             ', saveNR
+     PRINT *, '                - savePicard:                                         ', savePicard
      PRINT *, '                - saveTau:                                            ', saveTau
      PRINT *, '                - transport_1d:                          ', transport_1d
      PRINT *, '                - transport_model_path:                  ', TRIM(ADJUSTL(input%transport_model_path))
@@ -660,6 +717,10 @@ SUBROUTINE READ_input()
      PRINT *, '                - tau(6):                                             ', numer%tau(6)
      PRINT *, '                - neutralp lambda:                                    ', numer%neutralp_lambda
      PRINT *, '                - max number of N-R iterations:                       ', numer%nrp
+     PRINT *, '                - max number of Picard iterations:                   ', numer%picard_max_iter
+     PRINT *, '                - convergence tolerance for Picard loop:             ', numer%picard_tol
+     PRINT *, '                - inexact forcing parameter (eta) for NR:            ', numer%picard_eta
+     PRINT *, '                - under-relaxation factor for Picard loop:           ', numer%picard_relax
      PRINT *, '                - tolerance for the N-R scheme:                       ', numer%tNR
      PRINT *, '                - tolerance for the steady state achievement:         ', numer%tTM
      IF (switch%shockcp .GT. 0) THEN

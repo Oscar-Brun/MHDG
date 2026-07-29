@@ -206,13 +206,9 @@ MODULE types
      INTEGER                   :: npv ! Number of physical variables
      INTEGER                   :: idx_rhon_eq = 0 ! Conservative-variable index of neutral density equation, 0 if absent
      INTEGER                   :: idx_gamman_eq = 0 ! Conservative-variable index of neutral momentum equation, 0 if absent
-     INTEGER                   :: idx_gammanx_eq = 0 ! Conservative-variable index of neutral X momentum equation, 0 if absent
-     INTEGER                   :: idx_gammany_eq = 0 ! Conservative-variable index of neutral Y momentum equation, 0 if absent
      INTEGER                   :: idx_k_eq = 0 ! Conservative-variable index of k equation, 0 if absent
      INTEGER                   :: idx_rhon_pv = 0 ! Physical-variable index of neutral density, 0 if absent
      INTEGER                   :: idx_un_pv = 0 ! Physical-variable index of neutral parallel velocity, 0 if absent
-     INTEGER                   :: idx_unx_pv = 0 ! Physical-variable index of neutral X velocity, 0 if absent
-     INTEGER                   :: idx_uny_pv = 0 ! Physical-variable index of neutral Y velocity, 0 if absent
      INTEGER                   :: idx_k_pv = 0 ! Physical-variable index of turbulent energy, 0 if absent
      REAL*8                    :: diff_n, diff_u ! Perpendicular diffusion in the continuity and momentum equation
      REAL*8                    :: a ! Proportionality constant between pressure and density for isothermal model (p = a*rho)
@@ -447,6 +443,7 @@ MODULE types
      LOGICAL :: decoup  ! Decouple N-Gamma from Te-Ti (only used for N-Gamma-Ti-Te model)
      LOGICAL :: ckeramp ! Chech the error amplification in the linear system solution (for very ill-conditioned matrices)
      LOGICAL :: saveNR  ! Save solution at each NR iteration
+     LOGICAL :: savePicard ! Save solution (plasma + neutral) at each Picard (segregated coupling) iteration
      LOGICAL :: saveTau ! Save tau on faces
      LOGICAL :: transport_1d ! Save reduced 1D flux-surface profiles with solution output
      LOGICAL :: fixdPotLim
@@ -465,6 +462,8 @@ MODULE types
      LOGICAL :: import_diffusion_1D ! import 1D diffusion profiles from file, complemented by path in inputs
      LOGICAL :: neutral_wall_sources_in_elements ! move neutral puff/pump wall sources to adjacent element volumes
      LOGICAL :: neutral_perpendicular_diffusion ! use perpendicular, instead of isotropic, neutral density diffusion
+     LOGICAL :: picard_emulation ! sever the plasma<->neutral Newton coupling to emulate a segregated (Picard) solve
+     LOGICAL :: neutral_muscl ! Venus FV: order-2 (limited linear) reconstruction of n_n for the plasma coupling instead of piecewise-constant
   END TYPE Switches_type
 
   !***************************************************************
@@ -544,6 +543,13 @@ MODULE types
   !*******************************************************
   TYPE Numeric_type
      INTEGER        :: nrp      ! Max number of Newton-Raphson iterations
+     ! Effective values are set by read_input (namelist NUMER_LST); the
+     ! initializers below only apply if READ_input has not been run.
+     ! picard_eta = 0 => exact NR (no dynamic NR tolerance).
+     INTEGER        :: picard_max_iter = 5 ! Max number of Picard iterations for neutral coupling
+     REAL*8         :: picard_tol = 1.d-3   ! Convergence tolerance for Picard coupling
+     REAL*8         :: picard_eta = 0.d0    ! Forcing parameter for dynamic NR tolerance
+     REAL*8         :: picard_relax = 0.5d0 ! Under-relaxation factor for coupling (alpha)
      REAL*8         :: tNR      ! Tolerance of the Newton-Raphson scheme
      REAL*8         :: tTM      ! Tolerance for the steady state achievement
      REAL*8         :: div      ! Divergence detector
@@ -705,6 +711,7 @@ MODULE types
   !**********************************************************
   TYPE Simulationparams_type
      CHARACTER(len =50) :: model
+     CHARACTER(len =20) :: neutral_model_type = 'None'
      INTEGER            :: Ndim
      INTEGER            :: Neq
      REAL, ALLOCATABLE  :: consvar_refval(:)

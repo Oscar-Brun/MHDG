@@ -449,13 +449,14 @@ CONTAINS
   !************************************************
   ! Set the name of the solution
   !************************************************
-  SUBROUTINE setSolName(save_name, mesh_name, it, convNR, convT)
+  SUBROUTINE setSolName(save_name, mesh_name, it, convNR, convT, picard_iter)
     CHARACTER(LEN=1024), INTENT(INOUT):: save_name
     CHARACTER(LEN=1024), INTENT(IN)   :: mesh_name
     INTEGER, INTENT(IN)                  :: it
     LOGICAL, INTENT(IN)                  :: convNR, convT
+    INTEGER, INTENT(IN), OPTIONAL        :: picard_iter
     CHARACTER(LEN=20)                 :: Num
-    INTEGER                             :: l, i
+    INTEGER                             :: l, i, k
 
     ! At the beginning, the save name is the mesh name..
     save_name = TRIM(ADJUSTL(mesh_name))
@@ -496,6 +497,17 @@ CONTAINS
     WRITE (Num, "(E10.3)") phys%diff_pare
     save_name = TRIM(ADJUSTL(save_name))//"_DPae"//TRIM(ADJUSTL(Num))
 #endif
+    ! Picard tag (segregated coupling): added as soon as picard_iter is supplied,
+    ! including for a snapshot taken at a converged NR (savePicard), not only
+    ! during the NR sweeps (saveNR). Order unchanged for saveNR: _Pic..._NR...
+    IF (PRESENT(picard_iter) .AND. picard_iter > 0) THEN
+       WRITE (Num, "(i10)") picard_iter
+       Num = TRIM(ADJUSTL(Num))
+       k = INDEX(Num, " ") - 1
+       ! MAX(...,0): REPEAT requires NCOPIES >= 0, whereas k reaches 3 as soon as
+       ! picard_iter >= 100 and nothing bounds picard_max_iter from above.
+       save_name = TRIM(ADJUSTL(save_name))//"_Pic"//REPEAT("0", MAX(2 - k, 0))//TRIM(ADJUSTL(Num))
+    END IF
     ! Complete the save name: if not converged the NR, I put NR + the iteration number
     IF (.NOT. convNR) THEN
        WRITE (Num, "(i10)") it
@@ -526,12 +538,20 @@ CONTAINS
     save_name = TRIM(ADJUSTL(input%save_folder))//save_name
   END SUBROUTINE setSolName
 
-  SUBROUTINE compute_dt(errlstime)
-    REAL*8, INTENT(in) :: errlstime
+  SUBROUTINE compute_dt(errlstime, dtmax)
+    ! Pseudo-transient continuation (SER, Switched Evolution Relaxation):
+    ! doubles the time step once the RMS variation per step (errlstime*dt) has
+    ! dropped below 1e-3, capped at dtmax. A finite step preserves the BDF
+    ! anchor that stabilizes the segregated coupling; the cap prevents dt from
+    ! growing too much (otherwise the BDF diagonal of the neutral FV solver
+    ! vanishes and the Gauss-Seidel sweep stops converging).
+    ! Called under the Venus coupling only (MHDG.f90); the monolithic path
+    ! never uses it.
+    REAL*8, INTENT(in) :: errlstime, dtmax
 
-    IF ((errlstime*time%dt) < 1e-3) THEN
-       WRITE (6, *) "******** Changing time step ***********"
-       time%dt = time%dt*2.
+    IF ((errlstime*time%dt) < 1e-3 .AND. time%dt < dtmax) THEN
+       time%dt = MIN(time%dt*2., dtmax)
+       WRITE (6, '("   [TIME] dt doubled -> ", E12.5, "  (cap ", E12.5, ")")') time%dt, dtmax
     ENDIF
   END SUBROUTINE compute_dt
 
@@ -637,9 +657,9 @@ CONTAINS
           DEALLOCATE(qiter_best)
           ALLOCATE(uiter_best(SIZE(u)))
           ALLOCATE(qiter_best(SIZE(q)))
-          uiter_best = u
-          qiter_best = q
-       ENDIF
+       END IF
+       uiter_best = u
+       qiter_best = q
     ELSE
        ALLOCATE(uiter_best(SIZE(u)))
        ALLOCATE(qiter_best(SIZE(q)))

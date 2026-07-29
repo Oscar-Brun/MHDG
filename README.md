@@ -59,3 +59,13 @@ You may then change the desired values in scan less or you can also play with mi
 
 ## Postprocessing
 For visualizing the results, see this [python package](https://github.com/wave46/HDG_postprocess).
+## Venus — segregated plasma / neutral coupling
+
+The neutral species can be solved on its own finite-volume mesh and coupled to
+the HDG plasma solver through an outer Picard loop, instead of being added to
+the monolithic HDG system. Build with `MODE = VENUS` and select the model with
+`neutral_model_type` (`'None'`, `'Diffusion'` or `'Venus'`) in `param.txt`.
+
+See [docs/VENUS.md](docs/VENUS.md) for the equations, the numerics and the
+relation to the legacy diffusive model, and `test/param_venus.txt` for a
+commented example input.

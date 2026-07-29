@@ -182,7 +182,7 @@ LinearAlgebra.o : LinearAlgebra.F
 inout.F : $(SDIR)/InOut/inout.f90
 	$(CMP) -s $< $@ || $(CP) -f $< $@
 
-inout.o : inout.F HDF5_io.o flux_surface_transport_data.o transport_models_1d.o diagnostics.o diagnostics_output_hdf5.o globals.o PrintUtils.o LinearAlgebra.o gmsh_io.o MPI_OMP.o Communications.o
+inout.o : inout.F HDF5_io.o flux_surface_transport_data.o transport_models_1d.o diagnostics.o diagnostics_output_hdf5.o globals.o PrintUtils.o LinearAlgebra.o gmsh_io.o MPI_OMP.o Communications.o neutral_coupling.o
 	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
 
 Debug.F : $(SDIR)/Utils/Debug.f90
@@ -326,7 +326,7 @@ hdg_PrecalculatedFirstEquation.o : hdg_PrecalculatedFirstEquation.F globals.o Li
 hdg_ComputeJacobian.F : $(SDIR)/HDG/hdg_ComputeJacobian.f90
 	$(CMP) -s $< $@ || $(CP) -f $< $@
 
-hdg_ComputeJacobian.o : hdg_ComputeJacobian.F globals.o analytical.o LinearAlgebra.o physics.o hdg_LimitingTechniques.o
+hdg_ComputeJacobian.o : hdg_ComputeJacobian.F globals.o analytical.o LinearAlgebra.o physics.o hdg_LimitingTechniques.o neutral_coupling.o
 	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
 
 hdg_Mapping.F : $(SDIR)/HDG/hdg_Mapping.f90
@@ -375,6 +375,30 @@ Postprocess.F : $(SDIR)/InOut/Postprocess.f90
 	$(CMP) -s $< $@ || $(CP) -f $< $@
 
 Postprocess.o : Postprocess.F globals.o analytical.o PrintUtils.o LinearAlgebra.o
+	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
+
+venus_types.F : $(SDIR)/Venus/venus_types.f90
+	$(CMP) -s $< $@ || $(CP) -f $< $@
+
+venus_types.o : venus_types.F
+	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
+
+venus_mesh.F : $(SDIR)/Venus/venus_mesh.f90
+	$(CMP) -s $< $@ || $(CP) -f $< $@
+
+venus_mesh.o : venus_mesh.F venus_types.o globals.o
+	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
+
+venus_physics.F : $(SDIR)/Venus/venus_physics.f90
+	$(CMP) -s $< $@ || $(CP) -f $< $@
+
+venus_physics.o : venus_physics.F globals.o physics.o
+	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
+
+neutral_coupling.F : $(SDIR)/neutral_coupling.f90
+	$(CMP) -s $< $@ || $(CP) -f $< $@
+
+neutral_coupling.o : neutral_coupling.F globals.o venus_types.o venus_mesh.o venus_physics.o physics.o MPI_OMP.o
 	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
 
 gmsh.F : $(MHDG_GMSH_DIR)/include/gmsh.f90
@@ -428,7 +452,7 @@ Main_utils.o : Main_utils.F external_heating.o inout.o gmsh_io.o adaptivity_gene
 MHDG.F : $(SDIR)/MHDG.f90
 	$(CMP) -s $< $@ || $(CP) -f $< $@
 
-MHDG.o : MHDG.F MPI_OMP.o Main_utils.o
+MHDG.o : MHDG.F MPI_OMP.o Main_utils.o neutral_coupling.o
 	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
 
 Convergence.F : $(SDIR)/Convergence.f90
@@ -437,8 +461,8 @@ Convergence.F : $(SDIR)/Convergence.f90
 Convergence.o : Convergence.F inout.o gmsh_io.o reference_element.o MPI_OMP.o PrintUtils.o Debug.o initialization.o Postprocess.o
 	$(FC) -c $(FCFLAGS) $(INC)  $< -o $@
 
-MHDG-$(MDL)-$(MODE)-$(DIM) : Main_utils.o MPI_OMP.o matrices_types.o interpolation.o PrintUtils.o diagnostics.o diagnostics_accumulation.o diagnostics_reduction.o diagnostics_quantities.o diagnostics_wall_sources.o diagnostics_output_terminal.o diagnostics_output_hdf5.o prec_const.o types.o globals.o adimensionalization.o Debug.o LinearAlgebra.o magnetic_field.o external_heating.o physics.o read_input.o HDF5_io.o flux_surface_transport_data.o transport_models_1d_config.o transport_models_1d_derived.o transport_models_1d.o transport_models_1d_update.o transport_models_1d_diffusion_bohm_gyrobohm.o transport_models_1d_common.o transport_models_1d_pinch.o transport_models_1d_io.o transport_models_1d_runtime.o inout.o gmsh_io.o gmsh.o reference_element.o preprocess.o analytical.o initialization.o element_mapping.o adaptivity_projection.o hdg_PrecalculatedFirstEquation.o hdg_ComputeJacobian.o  $(ADDMOD) hdg_Mapping.o hdg_BC.o hdg_Assembly.o solve_global_system.o compute_element_solution.o adaptivity_general.o adaptivity_common.o mod_splines.o adaptivity_estimator.o adaptivity_indicator.o  domain_decomposition.o MHDG.o
-	$(FC) $(FCFLAGS)  Main_utils.o MPI_OMP.o matrices_types.o interpolation.o PrintUtils.o diagnostics.o diagnostics_accumulation.o diagnostics_reduction.o diagnostics_quantities.o diagnostics_wall_sources.o diagnostics_output_terminal.o diagnostics_output_hdf5.o prec_const.o types.o globals.o adimensionalization.o Debug.o LinearAlgebra.o magnetic_field.o external_heating.o physics.o read_input.o HDF5_io.o flux_surface_transport_data.o transport_models_1d_config.o transport_models_1d_derived.o transport_models_1d.o transport_models_1d_update.o transport_models_1d_diffusion_bohm_gyrobohm.o transport_models_1d_common.o transport_models_1d_pinch.o transport_models_1d_io.o transport_models_1d_runtime.o inout.o gmsh_io.o gmsh.o reference_element.o preprocess.o analytical.o initialization.o element_mapping.o adaptivity_projection.o hdg_PrecalculatedFirstEquation.o hdg_ComputeJacobian.o  Postprocess.o $(ADDMOD) hdg_Mapping.o hdg_BC.o hdg_Assembly.o  solve_global_system.o compute_element_solution.o mod_splines.o adaptivity_general.o adaptivity_common.o adaptivity_indicator.o adaptivity_estimator.o domain_decomposition.o MHDG.o -o MHDG-$(MDL)-$(MODE)-$(DIM) $(LIB)
+MHDG-$(MDL)-$(MODE)-$(DIM) : Main_utils.o MPI_OMP.o matrices_types.o interpolation.o PrintUtils.o diagnostics.o diagnostics_accumulation.o diagnostics_reduction.o diagnostics_quantities.o diagnostics_wall_sources.o diagnostics_output_terminal.o diagnostics_output_hdf5.o prec_const.o types.o globals.o adimensionalization.o Debug.o LinearAlgebra.o magnetic_field.o external_heating.o physics.o read_input.o HDF5_io.o flux_surface_transport_data.o transport_models_1d_config.o transport_models_1d_derived.o transport_models_1d.o transport_models_1d_update.o transport_models_1d_diffusion_bohm_gyrobohm.o transport_models_1d_common.o transport_models_1d_pinch.o transport_models_1d_io.o transport_models_1d_runtime.o inout.o gmsh_io.o gmsh.o reference_element.o preprocess.o analytical.o initialization.o element_mapping.o adaptivity_projection.o hdg_PrecalculatedFirstEquation.o hdg_ComputeJacobian.o  $(ADDMOD) hdg_Mapping.o hdg_BC.o hdg_Assembly.o solve_global_system.o compute_element_solution.o adaptivity_general.o adaptivity_common.o mod_splines.o adaptivity_estimator.o adaptivity_indicator.o  domain_decomposition.o venus_types.o venus_mesh.o venus_physics.o neutral_coupling.o MHDG.o
+	$(FC) $(FCFLAGS)  Main_utils.o MPI_OMP.o matrices_types.o interpolation.o PrintUtils.o diagnostics.o diagnostics_accumulation.o diagnostics_reduction.o diagnostics_quantities.o diagnostics_wall_sources.o diagnostics_output_terminal.o diagnostics_output_hdf5.o prec_const.o types.o globals.o adimensionalization.o Debug.o LinearAlgebra.o magnetic_field.o external_heating.o physics.o read_input.o HDF5_io.o flux_surface_transport_data.o transport_models_1d_config.o transport_models_1d_derived.o transport_models_1d.o transport_models_1d_update.o transport_models_1d_diffusion_bohm_gyrobohm.o transport_models_1d_common.o transport_models_1d_pinch.o transport_models_1d_io.o transport_models_1d_runtime.o inout.o gmsh_io.o gmsh.o reference_element.o preprocess.o analytical.o initialization.o element_mapping.o adaptivity_projection.o hdg_PrecalculatedFirstEquation.o hdg_ComputeJacobian.o  Postprocess.o $(ADDMOD) hdg_Mapping.o hdg_BC.o hdg_Assembly.o  solve_global_system.o compute_element_solution.o mod_splines.o adaptivity_general.o adaptivity_common.o adaptivity_indicator.o adaptivity_estimator.o domain_decomposition.o venus_types.o venus_mesh.o venus_physics.o neutral_coupling.o MHDG.o -o MHDG-$(MDL)-$(MODE)-$(DIM) $(LIB)
 	/bin/cp -f MHDG-$(MDL)-$(MODE)-$(DIM) ../test/
 #	/bin/cp -f MHDG-$(MDL)-$(MODE)-$(DIM) ../test_anal/
 #	/bin/cp -f MHDG-$(MDL)-$(MODE)-$(DIM) ../test_psblas/

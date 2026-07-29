@@ -682,10 +682,15 @@ CONTAINS
       CALL transport_model_1d%apply_1D_diffusion(rho_pol_norm,diff_iso_fac,diff_ani_fac)
     ENDIF
 
+#ifdef NEUTRAL
+    ! Without an HDG neutral equation, idx_rhon_eq is 0 (set_model_layout) and
+    ! this access would read diff_iso_fac(0,0,:). diff_nn_Bou stays at zero, which
+    ! is the correct value: there is no HDG neutral diffusion to save in this build.
     if (save_tau) then
        indtausave = (ifa - 1)*refElPol%Ngauss1d+(/(i,i=1,refElPol%Ngauss1d)/)
        phys%diff_nn_Bou(indtausave) = diff_iso_fac(phys%idx_rhon_eq,phys%idx_rhon_eq,:)
      ENDIF
+#endif
 
     ! Physical variables at Gauss points (division by 0 during convergence test!!!)
      IF ( switch%testcase .NE. 2 ) THEN
@@ -746,6 +751,7 @@ CONTAINS
 
   END DO
 
+#ifdef NEUTRAL
   CALL diag%mpi_reduce_boundary_hdg()
   CALL diag%mpi_reduce_particles_content()
   IF (switch%balance_diagnostics_verbosity .GE. 1) THEN
@@ -755,6 +761,7 @@ CONTAINS
      CALL diag%print_particle_summary()
      CALL diag%print_boundary_hdg_summary()
   ENDIF
+#endif
   IF (save_tau) THEN
      WRITE (6,*) "Saving tau in the boundary faces"
      CALL saveMatrix(tau_save,'tau_save_bound')
@@ -1746,9 +1753,6 @@ CONTAINS
     real*8           :: qfg(:)
     real*8           :: bn,Abohm(Neq,Neq),APinch(Neq,Ndim)
     integer          :: i,j,k,idm,Neqstab,Neqgrad,inn,ik,ign
-#ifdef NEUTRALEULER
-    integer          :: ignx, igny
-#endif
 #ifdef VORTICITY
     integer*4        :: indk(Npfl)
     real*8           :: kcoeff
@@ -1790,10 +1794,6 @@ CONTAINS
     inn = phys%idx_rhon_eq
     ik = phys%idx_k_eq
     ign = phys%idx_gamman_eq
-#ifdef NEUTRALEULER
-    ignx = phys%idx_gammanx_eq
-    igny = phys%idx_gammany_eq
-#endif
 
     Neqstab = Neq
     Neqgrad = Neq
@@ -1817,10 +1817,10 @@ CONTAINS
 
     ! Compute Q^T^(k-1)
     Qpr = RESHAPE(qfg,(/Ndim,Neq/))
+#ifdef NEUTRAL
     neutral_limiter_phi = 1.d0
     neutral_diffiso = diffiso(inn,inn)
     neutral_diffani = diffani(inn,inn)
-#ifdef NEUTRAL
     IF (TRIM(ADJUSTL(phys%neutral_flux_limiter_mode)) .EQ. 'lagged_flux_limiter') THEN
       CALL compute_neutral_flux_limiter(ufg,qfg,neutral_limiter_phi,neutral_limiter_gamma_unlim, &
         &neutral_limiter_gamma_max,neutral_limiter_ratio,bg)
@@ -1869,16 +1869,6 @@ CONTAINS
                   indj = j + ind_asf
                   elMat%Alu(ind_ff(ind),ind_fe(indj),iel) = elMat%Alu(ind_ff(ind),ind_fe(indj),iel) + tau(i,i)*delta*dcs_du(j)*ufg(1)*NiNi
                  ENDDO
-#ifdef NEUTRALEULER
-        ELSE IF (ignx > 0 .AND. i == ignx) THEN
-          indj = inn + ind_asf
-          elMat%Alu(ind_ff(ind),ind_fe(indj),iel) = elMat%Alu(ind_ff(ind),ind_fe(indj),iel) + &
-            &tau(i,i)*delta*(-upfg(2)*bg(1))*NiNi*phys%recycling_neutral_gamma
-        ELSE IF (igny > 0 .AND. i == igny) THEN
-          indj = inn + ind_asf
-          elMat%Alu(ind_ff(ind),ind_fe(indj),iel) = elMat%Alu(ind_ff(ind),ind_fe(indj),iel) + &
-            &tau(i,i)*delta*(-upfg(2)*bg(2))*NiNi*phys%recycling_neutral_gamma
-#endif
 #ifdef NEUTRALGAMMA
         ELSE IF (ign > 0 .AND. i == ign) THEN
           indj = inn + ind_asf
@@ -1992,9 +1982,11 @@ CONTAINS
         dq_fs_i_dU = 0.0
       END IF
 
+#ifdef NEUTRAL
       call compute_Dnn_dU(ufg,Dnn_dU)
       Dnn_dU = neutral_limiter_phi*Dnn_dU
       Dnn_dU_u = dot_product(Dnn_dU,ufg)
+#endif
 #ifdef KEQUATION
 #ifdef DKLINEARIZED
       call compute_ddk_dU(ufg,xyf,q_cyl,ddk_dU)
@@ -2283,9 +2275,6 @@ CONTAINS
 #ifdef NEUTRALPNEW
     neutral_pressure_boundary_flux = dot_product(matmul(transpose(Qpr),ng),W5p)*boundary_scale
 #endif
-#ifdef NEUTRALEULER
-    if (ignx > 0 .and. igny > 0) flgflux_neutral_conv = flgflux_neutral_conv - (ufg(ignx)*ng(1) + ufg(igny)*ng(2))*2.*PI*dline*simpar%refval_density*simpar%refval_speed*simpar%refval_length**2
-#endif
 #ifdef NEUTRALGAMMA
     if (ign > 0) neutral_convection_boundary_flux = neutral_convection_boundary_flux - ufg(ign)*bn*boundary_scale
 #endif
@@ -2325,12 +2314,6 @@ CONTAINS
        indj = ind_asf + j
            elMat%ALL(ind_ff(indi),ind_ff(indj),iel) = elMat%ALL(ind_ff(indi),ind_ff(indj),iel) + Abohm(k,j)*NiNi*bn
     END DO
-#ifdef NEUTRALEULER
-    if (ignx > 0 .and. igny > 0) then
-      elMat%ALL(ind_ff(indi),ind_ff(ignx + ind_asf),iel) = elMat%ALL(ind_ff(indi),ind_ff(ignx + ind_asf),iel) + ng(1)*NiNi
-      elMat%ALL(ind_ff(indi),ind_ff(igny + ind_asf),iel) = elMat%ALL(ind_ff(indi),ind_ff(igny + ind_asf),iel) + ng(2)*NiNi
-    end if
-#endif
 #ifdef NEUTRALGAMMA
     if (ign > 0) then
       indj = ign + ind_asf
@@ -2417,10 +2400,7 @@ CONTAINS
         LOGICAL, INTENT(IN)          :: ntang
 
         REAL*8                       :: bn,Abohm(Neq,Neq)
-        INTEGER                      :: i,j,k,idm,inn,ign,ik
-#ifdef NEUTRALEULER
-        INTEGER                      :: ignx, igny
-#endif
+        INTEGER                      :: i,j,k,idm
         INTEGER*4                    :: indi(Npfl),indj(Npfl)
         REAL*8                       :: Qpr(Ndim,Neq)
 #ifdef TEMPERATURE
@@ -2439,13 +2419,6 @@ CONTAINS
 
 
         bn = dot_PRODUCT(bg,ng)
-        inn = phys%idx_rhon_eq
-        ign = phys%idx_gamman_eq
-        ik = phys%idx_k_eq
-#ifdef NEUTRALEULER
-        ignx = phys%idx_gammanx_eq
-        igny = phys%idx_gammany_eq
-#endif
 
     ! Compute Q^T^(k-1)
         Qpr = RESHAPE(qfg,(/Ndim,Neq/))
